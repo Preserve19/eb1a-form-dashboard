@@ -186,3 +186,15 @@ export interface AdminUser {
   email: string;
   password?: string;
 }
+
+// Form Summary Type (used for dashboard listings)
+export interface FormSummary {
+  id: string;
+  fullName: string;
+  email: string;
+  status: 'draft' | 'submitted';
+  createdAt: string;
+  updatedAt: string;
+  submittedAt?: string;
+}
+

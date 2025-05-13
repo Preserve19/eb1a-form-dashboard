@@ -1,39 +1,66 @@
 
 import { createClient } from '@supabase/supabase-js';
-import { supabase as supabaseClient } from '@/integrations/supabase/client';
+import * as XLSX from 'xlsx';
+import { FormSummary } from '@/types';
 
-// Use the client from the integration rather than environment variables
-export const supabase = supabaseClient;
+// Supabase configuration
+const supabaseUrl = 'https://stvalkqotmltdiuavnaj.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0dmFsa3FvdG1sdGRpdWF2bmFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxMzc0ODQsImV4cCI6MjA2MjcxMzQ4NH0.kB3Fue-zhojgVed1F2pNEUbx2YKAeIw3ZKd35e_eAYc';
 
-export async function uploadFile(file: File, path: string): Promise<string | null> {
-  try {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-    const filePath = `${path}/${fileName}`;
+// Create Supabase client
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-    const { error } = await supabase.storage
-      .from('eb1a-documents')
-      .upload(filePath, file);
+// Helper function to download form data as Excel
+export const downloadExcel = async (data: FormSummary[]): Promise<Blob> => {
+  // Convert data to Excel-friendly format
+  const excelData = data.map(item => ({
+    'Application ID': item.id,
+    'Full Name': item.fullName,
+    'Email': item.email,
+    'Status': item.status,
+    'Created Date': item.createdAt ? new Date(item.createdAt).toLocaleDateString() : '-',
+    'Last Updated': item.updatedAt ? new Date(item.updatedAt).toLocaleDateString() : '-',
+    'Submitted Date': item.submittedAt ? new Date(item.submittedAt).toLocaleDateString() : '-'
+  }));
+  
+  // Create a new workbook
+  const workbook = XLSX.utils.book_new();
+  const worksheet = XLSX.utils.json_to_sheet(excelData);
+  
+  // Add the worksheet to the workbook
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Applications');
+  
+  // Generate Excel file as array buffer
+  const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+  
+  // Convert to Blob
+  return new Blob([excelBuffer], { 
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+  });
+};
 
-    if (error) {
-      console.error('Error uploading file:', error);
-      return null;
-    }
-
-    // Get public URL for the file
-    const { data } = supabase.storage
-      .from('eb1a-documents')
-      .getPublicUrl(filePath);
-
-    return data.publicUrl;
-  } catch (error) {
-    console.error('Error in uploadFile:', error);
-    return null;
+// Helper function to upload a file to Supabase Storage
+export const uploadFile = async (
+  bucketName: string,
+  filePath: string,
+  file: File,
+  onProgress?: (progress: number) => void
+): Promise<string> => {
+  const { data, error } = await supabase.storage
+    .from(bucketName)
+    .upload(filePath, file, { 
+      upsert: true,
+      onUploadProgress: onProgress ? (progress) => {
+        onProgress(progress.percent || 0);
+      } : undefined
+    });
+  
+  if (error) {
+    throw new Error(`Error uploading file: ${error.message}`);
   }
-}
+  
+  // Return the full URL to the file
+  const { data: publicUrl } = supabase.storage.from(bucketName).getPublicUrl(data.path);
+  return publicUrl.publicUrl;
+};
 
-export async function downloadExcel(data: any): Promise<Blob> {
-  // This would typically be a server-side function, but we're mocking it here
-  const mockExcel = new Blob(['Excel data for ' + JSON.stringify(data)], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-  return mockExcel;
-}
