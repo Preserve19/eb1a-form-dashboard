@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Download, User, Calendar, Mail, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { Spinner } from '@/components/ui/spinner';
-import { supabase } from '@/lib/supabase';
+import { supabase, downloadApplicationDetail } from '@/lib/supabase';
 import { toast } from '@/components/ui/use-toast';
 import { EB1AFormData } from '@/types';
 
@@ -26,6 +26,7 @@ const ApplicationDetail = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [application, setApplication] = useState<FormRecord | null>(null);
   const [activeTab, setActiveTab] = useState('details');
+  const [isDownloading, setIsDownloading] = useState(false);
   
   useEffect(() => {
     const fetchApplication = async () => {
@@ -58,6 +59,39 @@ const ApplicationDetail = () => {
   
   const handleBack = () => {
     navigate('/admin');
+  };
+  
+  const handleDownload = async () => {
+    if (!id) return;
+    
+    setIsDownloading(true);
+    try {
+      const excelBlob = await downloadApplicationDetail(id);
+      
+      // Create a download link
+      const url = URL.createObjectURL(excelBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `application-${id}-${format(new Date(), 'yyyy-MM-dd')}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Download successful",
+        description: "Application details have been downloaded as Excel.",
+      });
+    } catch (error: any) {
+      console.error('Error downloading application:', error);
+      toast({
+        variant: "destructive",
+        title: "Download failed",
+        description: error.message || "Could not download application details.",
+      });
+    } finally {
+      setIsDownloading(false);
+    }
   };
   
   if (isLoading) {
@@ -150,8 +184,21 @@ const ApplicationDetail = () => {
             )}
             
             <div className="pt-4">
-              <Button className="w-full" variant="outline">
-                <Download className="mr-2 h-4 w-4" /> Download Full Application
+              <Button 
+                className="w-full" 
+                variant="outline"
+                onClick={handleDownload}
+                disabled={isDownloading}
+              >
+                {isDownloading ? (
+                  <>
+                    <Spinner size="sm" className="mr-2" /> Downloading...
+                  </>
+                ) : (
+                  <>
+                    <Download className="mr-2 h-4 w-4" /> Download Full Application
+                  </>
+                )}
               </Button>
             </div>
           </CardContent>
@@ -166,14 +213,19 @@ const ApplicationDetail = () => {
                   <TabsTrigger value="awards">Prizes & Awards</TabsTrigger>
                   <TabsTrigger value="memberships">Memberships</TabsTrigger>
                   <TabsTrigger value="publications">Publications</TabsTrigger>
-                  <TabsTrigger value="other">Other Criteria</TabsTrigger>
+                  <TabsTrigger value="judging">Judging</TabsTrigger>
+                  <TabsTrigger value="contributions">Contributions</TabsTrigger>
+                  <TabsTrigger value="articles">Articles</TabsTrigger>
+                  <TabsTrigger value="exhibitions">Exhibitions</TabsTrigger>
+                  <TabsTrigger value="leadingRoles">Leading Roles</TabsTrigger>
+                  <TabsTrigger value="salaries">Salaries</TabsTrigger>
+                  <TabsTrigger value="commercial">Commercial</TabsTrigger>
                 </TabsList>
               </Tabs>
             </CardHeader>
             
             <CardContent className="p-6">
-              {/* The key fix is here: We need to wrap TabsContent components within the Tabs component */}
-              <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsContent value="details" className="mt-0">
                   <div className="space-y-6">
                     <div>
@@ -249,6 +301,30 @@ const ApplicationDetail = () => {
                               {award.awardingOrganization} • {award.dateReceived}
                             </p>
                             <p className="mt-2">{award.awardDescription}</p>
+                            <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
+                              {award.certificateUrl && (
+                                <a 
+                                  href={award.certificateUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline"
+                                >
+                                  <Download className="mr-1 inline h-4 w-4" />
+                                  View Certificate
+                                </a>
+                              )}
+                              {award.supportingDocUrl && (
+                                <a 
+                                  href={award.supportingDocUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline"
+                                >
+                                  <Download className="mr-1 inline h-4 w-4" />
+                                  View Supporting Document
+                                </a>
+                              )}
+                            </div>
                           </CardContent>
                         </Card>
                       ))}
@@ -268,6 +344,30 @@ const ApplicationDetail = () => {
                             <h4 className="font-bold">{membership.associationName}</h4>
                             <p className="text-sm text-gray-500">Member since {membership.memberSince}</p>
                             <p className="mt-2">{membership.associationDescription}</p>
+                            <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
+                              {membership.certificateUrl && (
+                                <a 
+                                  href={membership.certificateUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline"
+                                >
+                                  <Download className="mr-1 inline h-4 w-4" />
+                                  View Certificate
+                                </a>
+                              )}
+                              {membership.supportingDocUrl && (
+                                <a 
+                                  href={membership.supportingDocUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline"
+                                >
+                                  <Download className="mr-1 inline h-4 w-4" />
+                                  View Supporting Document
+                                </a>
+                              )}
+                            </div>
                           </CardContent>
                         </Card>
                       ))}
@@ -289,6 +389,30 @@ const ApplicationDetail = () => {
                               {publication.publisherName} • {publication.publicationDate}
                             </p>
                             <p className="mt-2">{publication.contentSummary}</p>
+                            <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
+                              {publication.publicationUrl && (
+                                <a 
+                                  href={publication.publicationUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline"
+                                >
+                                  <Download className="mr-1 inline h-4 w-4" />
+                                  View Publication
+                                </a>
+                              )}
+                              {publication.evidenceUrl && (
+                                <a 
+                                  href={publication.evidenceUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline"
+                                >
+                                  <Download className="mr-1 inline h-4 w-4" />
+                                  View Evidence
+                                </a>
+                              )}
+                            </div>
                           </CardContent>
                         </Card>
                       ))}
@@ -298,35 +422,341 @@ const ApplicationDetail = () => {
                   )}
                 </TabsContent>
                 
-                <TabsContent value="other" className="mt-0">
-                  <h3 className="mb-4 text-lg font-medium">Other Criteria</h3>
-                  <p className="text-muted-foreground mb-4">
-                    View detailed information for each criterion by selecting the specific tab.
-                  </p>
-                  
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <Button 
-                      variant="outline" 
-                      onClick={() => setActiveTab('awards')}
-                      className="justify-start"
-                    >
-                      Prizes & Awards
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => setActiveTab('memberships')}
-                      className="justify-start"
-                    >
-                      Memberships
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => setActiveTab('publications')}
-                      className="justify-start"
-                    >
-                      Published Materials
-                    </Button>
-                  </div>
+                <TabsContent value="judging" className="mt-0">
+                  <h3 className="mb-4 text-lg font-medium">Judging Experiences</h3>
+                  {application.data.judgingExperiences && application.data.judgingExperiences.length > 0 ? (
+                    <div className="space-y-4">
+                      {application.data.judgingExperiences.map((exp, index) => (
+                        <Card key={exp.id || index}>
+                          <CardContent className="p-4">
+                            <h4 className="font-bold">{exp.judgeRole}</h4>
+                            <p className="text-sm text-gray-500">
+                              {exp.organizationName} • {exp.startDate} {exp.endDate ? `to ${exp.endDate}` : 'to Present'}
+                            </p>
+                            <p className="mt-2">{exp.description}</p>
+                            <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
+                              {exp.appointmentLetterUrl && (
+                                <a 
+                                  href={exp.appointmentLetterUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline"
+                                >
+                                  <Download className="mr-1 inline h-4 w-4" />
+                                  View Appointment Letter
+                                </a>
+                              )}
+                              {exp.evidenceUrl && (
+                                <a 
+                                  href={exp.evidenceUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline"
+                                >
+                                  <Download className="mr-1 inline h-4 w-4" />
+                                  View Evidence
+                                </a>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">No judging experiences submitted.</p>
+                  )}
+                </TabsContent>
+                
+                <TabsContent value="contributions" className="mt-0">
+                  <h3 className="mb-4 text-lg font-medium">Original Contributions</h3>
+                  {application.data.originalContributions && application.data.originalContributions.length > 0 ? (
+                    <div className="space-y-4">
+                      {application.data.originalContributions.map((contrib, index) => (
+                        <Card key={contrib.id || index}>
+                          <CardContent className="p-4">
+                            <h4 className="font-bold">{contrib.contributionTitle}</h4>
+                            <p className="text-sm text-gray-500">
+                              {contrib.field} • {contrib.contributionDate}
+                            </p>
+                            <p className="mt-2">{contrib.description}</p>
+                            <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
+                              {contrib.evidenceUrl && (
+                                <a 
+                                  href={contrib.evidenceUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline"
+                                >
+                                  <Download className="mr-1 inline h-4 w-4" />
+                                  View Evidence
+                                </a>
+                              )}
+                              {contrib.lettersUrl && (
+                                <a 
+                                  href={contrib.lettersUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline"
+                                >
+                                  <Download className="mr-1 inline h-4 w-4" />
+                                  View Support Letters
+                                </a>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">No original contributions submitted.</p>
+                  )}
+                </TabsContent>
+                
+                <TabsContent value="articles" className="mt-0">
+                  <h3 className="mb-4 text-lg font-medium">Scholarly Articles</h3>
+                  {application.data.scholarlyArticles && application.data.scholarlyArticles.length > 0 ? (
+                    <div className="space-y-4">
+                      {application.data.scholarlyArticles.map((article, index) => (
+                        <Card key={article.id || index}>
+                          <CardContent className="p-4">
+                            <h4 className="font-bold">{article.articleTitle}</h4>
+                            <p className="text-sm text-gray-500">
+                              {article.journalName} • {article.publicationDate}
+                            </p>
+                            <p className="mt-2">{article.abstract}</p>
+                            <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
+                              {article.articleUrl && (
+                                <a 
+                                  href={article.articleUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline"
+                                >
+                                  <Download className="mr-1 inline h-4 w-4" />
+                                  View Article
+                                </a>
+                              )}
+                              {article.citationUrl && (
+                                <a 
+                                  href={article.citationUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline"
+                                >
+                                  <Download className="mr-1 inline h-4 w-4" />
+                                  View Citations
+                                </a>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">No scholarly articles submitted.</p>
+                  )}
+                </TabsContent>
+                
+                <TabsContent value="exhibitions" className="mt-0">
+                  <h3 className="mb-4 text-lg font-medium">Exhibitions</h3>
+                  {application.data.exhibitions && application.data.exhibitions.length > 0 ? (
+                    <div className="space-y-4">
+                      {application.data.exhibitions.map((exhibition, index) => (
+                        <Card key={exhibition.id || index}>
+                          <CardContent className="p-4">
+                            <h4 className="font-bold">{exhibition.exhibitionName}</h4>
+                            <p className="text-sm text-gray-500">
+                              {exhibition.venueName}, {exhibition.venueLocation} • {exhibition.startDate} {exhibition.endDate ? `to ${exhibition.endDate}` : ''}
+                            </p>
+                            <p className="mt-2">{exhibition.exhibitionDescription}</p>
+                            <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-3">
+                              {exhibition.exhibitionDocUrl && (
+                                <a 
+                                  href={exhibition.exhibitionDocUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline"
+                                >
+                                  <Download className="mr-1 inline h-4 w-4" />
+                                  View Exhibition Doc
+                                </a>
+                              )}
+                              {exhibition.visualEvidenceUrl && (
+                                <a 
+                                  href={exhibition.visualEvidenceUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline"
+                                >
+                                  <Download className="mr-1 inline h-4 w-4" />
+                                  View Visual Evidence
+                                </a>
+                              )}
+                              {exhibition.reviewsUrl && (
+                                <a 
+                                  href={exhibition.reviewsUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline"
+                                >
+                                  <Download className="mr-1 inline h-4 w-4" />
+                                  View Reviews
+                                </a>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">No exhibitions submitted.</p>
+                  )}
+                </TabsContent>
+                
+                <TabsContent value="leadingRoles" className="mt-0">
+                  <h3 className="mb-4 text-lg font-medium">Leading Roles</h3>
+                  {application.data.leadingRoles && application.data.leadingRoles.length > 0 ? (
+                    <div className="space-y-4">
+                      {application.data.leadingRoles.map((role, index) => (
+                        <Card key={role.id || index}>
+                          <CardContent className="p-4">
+                            <h4 className="font-bold">{role.roleTitle}</h4>
+                            <p className="text-sm text-gray-500">
+                              {role.organizationName} • {role.startDate} {role.endDate ? `to ${role.endDate}` : 'to Present'}
+                            </p>
+                            <p className="mt-2">{role.responsibilities}</p>
+                            <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
+                              {role.verificationUrl && (
+                                <a 
+                                  href={role.verificationUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline"
+                                >
+                                  <Download className="mr-1 inline h-4 w-4" />
+                                  View Verification
+                                </a>
+                              )}
+                              {role.organizationChartUrl && (
+                                <a 
+                                  href={role.organizationChartUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline"
+                                >
+                                  <Download className="mr-1 inline h-4 w-4" />
+                                  View Org Chart
+                                </a>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">No leading roles submitted.</p>
+                  )}
+                </TabsContent>
+                
+                <TabsContent value="salaries" className="mt-0">
+                  <h3 className="mb-4 text-lg font-medium">High Salaries</h3>
+                  {application.data.highSalaries && application.data.highSalaries.length > 0 ? (
+                    <div className="space-y-4">
+                      {application.data.highSalaries.map((salary, index) => (
+                        <Card key={salary.id || index}>
+                          <CardContent className="p-4">
+                            <h4 className="font-bold">{salary.employerName}</h4>
+                            <p className="text-sm text-gray-500">
+                              {salary.baseSalary} {salary.currency} {salary.frequency} • {salary.startDate} {salary.endDate ? `to ${salary.endDate}` : 'to Present'}
+                            </p>
+                            <p className="mt-2">{salary.additionalCompensation}</p>
+                            <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-3">
+                              {salary.salaryDocUrl && (
+                                <a 
+                                  href={salary.salaryDocUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline"
+                                >
+                                  <Download className="mr-1 inline h-4 w-4" />
+                                  View Salary Documents
+                                </a>
+                              )}
+                              {salary.industryEvidenceUrl && (
+                                <a 
+                                  href={salary.industryEvidenceUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline"
+                                >
+                                  <Download className="mr-1 inline h-4 w-4" />
+                                  View Industry Evidence
+                                </a>
+                              )}
+                              {salary.expertLettersUrl && (
+                                <a 
+                                  href={salary.expertLettersUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline"
+                                >
+                                  <Download className="mr-1 inline h-4 w-4" />
+                                  View Expert Letters
+                                </a>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">No high salary evidence submitted.</p>
+                  )}
+                </TabsContent>
+                
+                <TabsContent value="commercial" className="mt-0">
+                  <h3 className="mb-4 text-lg font-medium">Commercial Successes</h3>
+                  {application.data.commercialSuccesses && application.data.commercialSuccesses.length > 0 ? (
+                    <div className="space-y-4">
+                      {application.data.commercialSuccesses.map((success, index) => (
+                        <Card key={success.id || index}>
+                          <CardContent className="p-4">
+                            <h4 className="font-bold">{success.projectTitle}</h4>
+                            <p className="text-sm text-gray-500">
+                              {success.projectType} • {success.role} • Released {success.releaseDate}
+                            </p>
+                            <p className="mt-2">{success.metrics}</p>
+                            <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
+                              {success.salesDocUrl && (
+                                <a 
+                                  href={success.salesDocUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline"
+                                >
+                                  <Download className="mr-1 inline h-4 w-4" />
+                                  View Sales Documents
+                                </a>
+                              )}
+                              {success.mediaCoverageUrl && (
+                                <a 
+                                  href={success.mediaCoverageUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline"
+                                >
+                                  <Download className="mr-1 inline h-4 w-4" />
+                                  View Media Coverage
+                                </a>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">No commercial success evidence submitted.</p>
+                  )}
                 </TabsContent>
               </Tabs>
             </CardContent>
