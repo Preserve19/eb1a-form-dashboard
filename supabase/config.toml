@@ -1,1 +1,6 @@
+
 project_id = "stvalkqotmltdiuavnaj"
+
+[storage]
+[storage.uploads]
+public = true

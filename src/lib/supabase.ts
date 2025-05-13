@@ -50,9 +50,11 @@ export const uploadFile = async (
     .from(bucketName)
     .upload(filePath, file, { 
       upsert: true,
-      onUploadProgress: onProgress ? (progress) => {
-        onProgress(progress.percent || 0);
-      } : undefined
+      onUploadProgress: (progress) => {
+        if (onProgress) {
+          onProgress(progress.percent || 0);
+        }
+      }
     });
   
   if (error) {
@@ -63,4 +65,3 @@ export const uploadFile = async (
   const { data: publicUrl } = supabase.storage.from(bucketName).getPublicUrl(data.path);
   return publicUrl.publicUrl;
 };
-

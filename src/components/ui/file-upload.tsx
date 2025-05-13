@@ -50,7 +50,20 @@ export function FileUpload({
     setError(null);
 
     try {
-      const fileUrl = await uploadFile(file, path);
+      // Use the correct parameters for uploadFile
+      // We need to use 'uploads' as the bucket name and generate a unique file path
+      const bucketName = 'uploads';
+      const uniqueFilePath = `${path}/${Date.now()}-${file.name}`;
+      
+      const fileUrl = await uploadFile(
+        bucketName,
+        uniqueFilePath,
+        file,
+        (progress) => {
+          console.log(`Upload progress: ${progress}%`);
+        }
+      );
+      
       if (fileUrl) {
         onChange(fileUrl);
         setFileName(file.name);
