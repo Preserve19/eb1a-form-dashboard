@@ -14,11 +14,19 @@ import SuccessPage from "./pages/Success";
 import NotFound from "./pages/NotFound";
 import AdminLogin from "./pages/admin/Login";
 import AdminDashboard from "./pages/admin/Dashboard";
+import ApplicationDetail from "./pages/admin/ApplicationDetail";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ForgotPassword from "./pages/admin/ForgotPassword";
 
 // Create a client
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      staleTime: 1000 * 60 * 5, // 5 minutes
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -42,6 +50,7 @@ const App = () => (
               {/* Protected Admin Routes */}
               <Route element={<ProtectedRoute />}>
                 <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/admin/application/:id" element={<ApplicationDetail />} />
               </Route>
               
               {/* 404 Route */}

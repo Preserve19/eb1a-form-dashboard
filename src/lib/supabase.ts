@@ -1,15 +1,9 @@
 
 import { createClient } from '@supabase/supabase-js';
+import { supabase as supabaseClient } from '@/integrations/supabase/client';
 
-// Get Supabase URL and anon key from environment variables
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://your-project-url.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your-anon-key';
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Missing Supabase environment variables. Using fallback values.');
-}
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Use the client from the integration rather than environment variables
+export const supabase = supabaseClient;
 
 export async function uploadFile(file: File, path: string): Promise<string | null> {
   try {

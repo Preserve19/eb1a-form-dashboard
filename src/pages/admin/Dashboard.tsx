@@ -11,6 +11,7 @@ import { supabase, downloadExcel } from '@/lib/supabase';
 import { LogOut, Search, Download, RefreshCw, FileText, Users, CheckCircle, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { Spinner } from '@/components/ui/spinner';
+import { toast } from '@/components/ui/use-toast';
 
 interface FormSummary {
   id: string;
@@ -48,23 +49,32 @@ const Dashboard = () => {
       }
       
       // Transform raw data into FormSummary objects
-      const formSummaries: FormSummary[] = data.map(item => {
-        const formData = item.data;
+      const formSummaries: FormSummary[] = data?.map(item => {
         return {
           id: item.id,
-          fullName: formData.fullName || 'Unknown',
-          email: formData.email || 'No email provided',
+          fullName: item.data?.fullName || 'Unknown',
+          email: item.data?.email || 'No email provided',
           status: item.status,
           createdAt: item.created_at,
           updatedAt: item.updated_at,
           submittedAt: item.submitted_at
         };
-      });
+      }) || [];
       
       setFormData(formSummaries);
       setFilteredData(formSummaries);
-    } catch (error) {
+      
+      toast({
+        title: "Data loaded",
+        description: `${formSummaries.length} applications loaded successfully`,
+      });
+    } catch (error: any) {
       console.error('Error loading form data:', error);
+      toast({
+        variant: "destructive",
+        title: "Error loading data",
+        description: error.message || "Could not load application data",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -128,8 +138,18 @@ const Dashboard = () => {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    } catch (error) {
+      
+      toast({
+        title: "Export successful",
+        description: `${dataToExport.length} applications exported to Excel`,
+      });
+    } catch (error: any) {
       console.error('Error exporting data:', error);
+      toast({
+        variant: "destructive",
+        title: "Export failed",
+        description: error.message || "Could not export data to Excel",
+      });
     } finally {
       setIsExporting(false);
     }
@@ -139,6 +159,12 @@ const Dashboard = () => {
   const handleLogout = () => {
     signOut();
     navigate('/admin/login');
+  };
+
+  // Handle view application
+  const handleViewApplication = (id: string) => {
+    // Navigate to a detailed view of the application
+    navigate(`/admin/application/${id}`);
   };
 
   // Statistics
@@ -227,7 +253,7 @@ const Dashboard = () => {
                   onClick={loadFormData}
                   disabled={isLoading}
                 >
-                  <RefreshCw size={16} className="mr-2" />
+                  <RefreshCw size={16} className={`mr-2 ${isLoading ? 'animate-spin' : ''}`} />
                   Refresh
                 </Button>
                 
@@ -260,15 +286,15 @@ const Dashboard = () => {
             </div>
             
             <TabsContent value="all" className="m-0">
-              {renderApplicationsTable(filteredData, isLoading)}
+              {renderApplicationsTable(filteredData, isLoading, handleViewApplication)}
             </TabsContent>
             
             <TabsContent value="submitted" className="m-0">
-              {renderApplicationsTable(filteredData, isLoading)}
+              {renderApplicationsTable(filteredData, isLoading, handleViewApplication)}
             </TabsContent>
             
             <TabsContent value="draft" className="m-0">
-              {renderApplicationsTable(filteredData, isLoading)}
+              {renderApplicationsTable(filteredData, isLoading, handleViewApplication)}
             </TabsContent>
           </Tabs>
         </Card>
@@ -283,7 +309,11 @@ const Dashboard = () => {
 };
 
 // Helper function to render the applications table
-const renderApplicationsTable = (data: FormSummary[], isLoading: boolean) => {
+const renderApplicationsTable = (
+  data: FormSummary[], 
+  isLoading: boolean, 
+  onView: (id: string) => void
+) => {
   if (isLoading) {
     return (
       <div className="flex h-60 items-center justify-center">
@@ -318,6 +348,7 @@ const renderApplicationsTable = (data: FormSummary[], isLoading: boolean) => {
             <TableHead>Status</TableHead>
             <TableHead>Created</TableHead>
             <TableHead>Last Updated</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -341,8 +372,18 @@ const renderApplicationsTable = (data: FormSummary[], isLoading: boolean) => {
                   )}
                 </div>
               </TableCell>
-              <TableCell>{format(new Date(application.createdAt), 'MMM d, yyyy')}</TableCell>
-              <TableCell>{format(new Date(application.updatedAt), 'MMM d, yyyy')}</TableCell>
+              <TableCell>{application.createdAt ? format(new Date(application.createdAt), 'MMM d, yyyy') : '-'}</TableCell>
+              <TableCell>{application.updatedAt ? format(new Date(application.updatedAt), 'MMM d, yyyy') : '-'}</TableCell>
+              <TableCell className="text-right">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => onView(application.id)}
+                  className="text-navy-800 hover:text-navy-600"
+                >
+                  View
+                </Button>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
