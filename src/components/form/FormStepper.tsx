@@ -9,7 +9,7 @@ const FormStepper = () => {
     { id: 1, name: 'Prizes & Awards' },
     { id: 2, name: 'Memberships' },
     { id: 3, name: 'Published Material' },
-    { id: 4, name: 'Judge of Others' Work' },
+    { id: 4, name: "Judge of Others' Work" },
     { id: 5, name: 'Original Contributions' },
     { id: 6, name: 'Scholarly Articles' },
     { id: 7, name: 'Exhibitions' },

@@ -37,7 +37,7 @@ const Form = () => {
     { title: 'Prizes & Awards', component: <PrizesAwards /> },
     { title: 'Memberships', component: <Memberships /> },
     { title: 'Published Material', component: <PublishedMaterials /> },
-    { title: 'Judge of Others' Work', component: <JudgingExperiences /> },
+    { title: "Judge of Others' Work", component: <JudgingExperiences /> },
     { title: 'Original Contributions', component: <OriginalContributions /> },
     { title: 'Scholarly Articles', component: <ScholarlyArticles /> },
     { title: 'Artistic Exhibitions', component: <Exhibitions /> },
