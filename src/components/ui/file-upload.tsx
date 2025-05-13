@@ -1,0 +1,128 @@
+
+import { useState } from 'react';
+import { Button } from './button';
+import { Input } from './input';
+import { Label } from './label';
+import { X, Upload, Check } from 'lucide-react';
+import { uploadFile } from '@/lib/supabase';
+import { Spinner } from './spinner';
+
+interface FileUploadProps {
+  id: string;
+  label: string;
+  hint?: string;
+  value?: string;
+  onChange: (url: string | undefined) => void;
+  accept?: string;
+  maxSize?: number; // in MB
+  path: string; // Storage path
+  className?: string;
+}
+
+export function FileUpload({
+  id,
+  label,
+  hint,
+  value,
+  onChange,
+  accept = 'application/pdf,image/png,image/jpeg',
+  maxSize = 10, // Default max size is 10MB
+  path,
+  className = '',
+}: FileUploadProps) {
+  const [isUploading, setIsUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [fileName, setFileName] = useState<string | null>(
+    value ? value.split('/').pop() : null
+  );
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Check file size
+    if (file.size > maxSize * 1024 * 1024) {
+      setError(`File size exceeds the limit of ${maxSize}MB`);
+      return;
+    }
+
+    setIsUploading(true);
+    setError(null);
+
+    try {
+      const fileUrl = await uploadFile(file, path);
+      if (fileUrl) {
+        onChange(fileUrl);
+        setFileName(file.name);
+      } else {
+        setError('Failed to upload file. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      setError('An error occurred during upload. Please try again.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleRemove = () => {
+    onChange(undefined);
+    setFileName(null);
+    setError(null);
+  };
+
+  return (
+    <div className={`space-y-2 ${className}`}>
+      <Label htmlFor={id}>{label}</Label>
+      {!value && !isUploading ? (
+        <>
+          <div className="mt-1 flex items-center gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              className="flex items-center gap-2"
+              asChild
+              disabled={isUploading}
+            >
+              <label htmlFor={id}>
+                <Upload size={16} /> Choose File
+                <Input
+                  id={id}
+                  type="file"
+                  accept={accept}
+                  onChange={handleFileChange}
+                  className="hidden"
+                  disabled={isUploading}
+                />
+              </label>
+            </Button>
+            {hint && <p className="text-sm text-muted-foreground">{hint}</p>}
+          </div>
+          {error && <p className="mt-1 text-sm text-destructive">{error}</p>}
+        </>
+      ) : isUploading ? (
+        <div className="mt-2 flex items-center gap-2">
+          <Spinner size="sm" />
+          <span className="text-sm">Uploading...</span>
+        </div>
+      ) : (
+        <div className="mt-2 flex items-center justify-between rounded-md border bg-secondary/50 p-2 text-sm">
+          <div className="flex items-center gap-2 overflow-hidden">
+            <Check size={16} className="shrink-0 text-green-600" />
+            <span className="truncate">{fileName || 'File uploaded'}</span>
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={handleRemove}
+            className="h-8 w-8 p-0"
+          >
+            <X size={16} />
+            <span className="sr-only">Remove</span>
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
