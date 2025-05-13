@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from './button';
 import { Input } from './input';
@@ -31,6 +30,7 @@ export function FileUpload({
   className = '',
 }: FileUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(
     value ? value.split('/').pop() : null
@@ -47,13 +47,21 @@ export function FileUpload({
     }
 
     setIsUploading(true);
+    setUploadProgress(0);
     setError(null);
 
     try {
-      // Use the correct parameters for uploadFile
       // We need to use 'uploads' as the bucket name and generate a unique file path
       const bucketName = 'uploads';
       const uniqueFilePath = `${path}/${Date.now()}-${file.name}`;
+      
+      // Simulate progress updates since the Supabase JS client doesn't support progress callbacks
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          const newProgress = prev + Math.random() * 10;
+          return newProgress > 90 ? 90 : newProgress;
+        });
+      }, 300);
       
       const fileUrl = await uploadFile(
         bucketName,
@@ -61,8 +69,13 @@ export function FileUpload({
         file,
         (progress) => {
           console.log(`Upload progress: ${progress}%`);
+          // This won't actually be called with the current implementation,
+          // but we're keeping the parameter for future compatibility
         }
       );
+      
+      clearInterval(progressInterval);
+      setUploadProgress(100);
       
       if (fileUrl) {
         onChange(fileUrl);
@@ -114,9 +127,17 @@ export function FileUpload({
           {error && <p className="mt-1 text-sm text-destructive">{error}</p>}
         </>
       ) : isUploading ? (
-        <div className="mt-2 flex items-center gap-2">
-          <Spinner size="sm" />
-          <span className="text-sm">Uploading...</span>
+        <div className="mt-2 space-y-2">
+          <div className="flex items-center gap-2">
+            <Spinner size="sm" />
+            <span className="text-sm">Uploading... {Math.round(uploadProgress)}%</span>
+          </div>
+          <div className="h-2 w-full overflow-hidden rounded-full bg-secondary">
+            <div 
+              className="h-full bg-primary transition-all duration-300" 
+              style={{ width: `${uploadProgress}%` }}
+            ></div>
+          </div>
         </div>
       ) : (
         <div className="mt-2 flex items-center justify-between rounded-md border bg-secondary/50 p-2 text-sm">

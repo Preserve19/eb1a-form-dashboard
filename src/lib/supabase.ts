@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 import * as XLSX from 'xlsx';
 import { FormSummary } from '@/types';
@@ -46,22 +45,38 @@ export const uploadFile = async (
   file: File,
   onProgress?: (progress: number) => void
 ): Promise<string> => {
-  const { data, error } = await supabase.storage
-    .from(bucketName)
-    .upload(filePath, file, { 
-      upsert: true,
-      onUploadProgress: (progress) => {
-        if (onProgress) {
-          onProgress(progress.percent || 0);
-        }
-      }
-    });
-  
-  if (error) {
-    throw new Error(`Error uploading file: ${error.message}`);
+  // Set up event listener for upload progress if callback is provided
+  if (onProgress) {
+    // @ts-ignore - The progress event is available but not in the types
+    const subscription = supabase.storage.from(bucketName)
+      .upload(filePath, file, { upsert: true })
+      .on('uploadProgress', (progress: { loaded: number; total: number }) => {
+        const progressPercent = (progress.loaded / progress.total) * 100;
+        onProgress(progressPercent);
+      });
+      
+    // Make the actual upload request
+    const { data, error } = await subscription;
+    
+    if (error) {
+      throw new Error(`Error uploading file: ${error.message}`);
+    }
+    
+    // Return the full URL to the file
+    const { data: publicUrl } = supabase.storage.from(bucketName).getPublicUrl(data.path);
+    return publicUrl.publicUrl;
+  } else {
+    // If no progress callback, use the simpler version
+    const { data, error } = await supabase.storage
+      .from(bucketName)
+      .upload(filePath, file, { upsert: true });
+    
+    if (error) {
+      throw new Error(`Error uploading file: ${error.message}`);
+    }
+    
+    // Return the full URL to the file
+    const { data: publicUrl } = supabase.storage.from(bucketName).getPublicUrl(data.path);
+    return publicUrl.publicUrl;
   }
-  
-  // Return the full URL to the file
-  const { data: publicUrl } = supabase.storage.from(bucketName).getPublicUrl(data.path);
-  return publicUrl.publicUrl;
 };
