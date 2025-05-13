@@ -172,160 +172,163 @@ const ApplicationDetail = () => {
             </CardHeader>
             
             <CardContent className="p-6">
-              <TabsContent value="details" className="mt-0">
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="mb-2 text-lg font-medium">Application Status</h3>
-                    <div className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${
-                      application.status === 'submitted' 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-amber-100 text-amber-800'
-                    }`}>
-                      {application.status === 'submitted' ? 'Submitted' : 'Draft'}
+              {/* The key fix is here: We need to wrap TabsContent components within the Tabs component */}
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsContent value="details" className="mt-0">
+                  <div className="space-y-6">
+                    <div>
+                      <h3 className="mb-2 text-lg font-medium">Application Status</h3>
+                      <div className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${
+                        application.status === 'submitted' 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-amber-100 text-amber-800'
+                      }`}>
+                        {application.status === 'submitted' ? 'Submitted' : 'Draft'}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h3 className="mb-2 text-lg font-medium">Submission Summary</h3>
+                      <table className="w-full text-sm">
+                        <tbody>
+                          <tr>
+                            <td className="py-2 pr-4 font-medium">Prizes & Awards</td>
+                            <td>{application.data.awards?.length || 0} entries</td>
+                          </tr>
+                          <tr>
+                            <td className="py-2 pr-4 font-medium">Memberships</td>
+                            <td>{application.data.memberships?.length || 0} entries</td>
+                          </tr>
+                          <tr>
+                            <td className="py-2 pr-4 font-medium">Published Materials</td>
+                            <td>{application.data.publishedMaterials?.length || 0} entries</td>
+                          </tr>
+                          <tr>
+                            <td className="py-2 pr-4 font-medium">Judging Experience</td>
+                            <td>{application.data.judgingExperiences?.length || 0} entries</td>
+                          </tr>
+                          <tr>
+                            <td className="py-2 pr-4 font-medium">Original Contributions</td>
+                            <td>{application.data.originalContributions?.length || 0} entries</td>
+                          </tr>
+                          <tr>
+                            <td className="py-2 pr-4 font-medium">Scholarly Articles</td>
+                            <td>{application.data.scholarlyArticles?.length || 0} entries</td>
+                          </tr>
+                          <tr>
+                            <td className="py-2 pr-4 font-medium">Exhibitions</td>
+                            <td>{application.data.exhibitions?.length || 0} entries</td>
+                          </tr>
+                          <tr>
+                            <td className="py-2 pr-4 font-medium">Leading Roles</td>
+                            <td>{application.data.leadingRoles?.length || 0} entries</td>
+                          </tr>
+                          <tr>
+                            <td className="py-2 pr-4 font-medium">High Salaries</td>
+                            <td>{application.data.highSalaries?.length || 0} entries</td>
+                          </tr>
+                          <tr>
+                            <td className="py-2 pr-4 font-medium">Commercial Successes</td>
+                            <td>{application.data.commercialSuccesses?.length || 0} entries</td>
+                          </tr>
+                        </tbody>
+                      </table>
                     </div>
                   </div>
-                  
-                  <div>
-                    <h3 className="mb-2 text-lg font-medium">Submission Summary</h3>
-                    <table className="w-full text-sm">
-                      <tbody>
-                        <tr>
-                          <td className="py-2 pr-4 font-medium">Prizes & Awards</td>
-                          <td>{application.data.awards?.length || 0} entries</td>
-                        </tr>
-                        <tr>
-                          <td className="py-2 pr-4 font-medium">Memberships</td>
-                          <td>{application.data.memberships?.length || 0} entries</td>
-                        </tr>
-                        <tr>
-                          <td className="py-2 pr-4 font-medium">Published Materials</td>
-                          <td>{application.data.publishedMaterials?.length || 0} entries</td>
-                        </tr>
-                        <tr>
-                          <td className="py-2 pr-4 font-medium">Judging Experience</td>
-                          <td>{application.data.judgingExperiences?.length || 0} entries</td>
-                        </tr>
-                        <tr>
-                          <td className="py-2 pr-4 font-medium">Original Contributions</td>
-                          <td>{application.data.originalContributions?.length || 0} entries</td>
-                        </tr>
-                        <tr>
-                          <td className="py-2 pr-4 font-medium">Scholarly Articles</td>
-                          <td>{application.data.scholarlyArticles?.length || 0} entries</td>
-                        </tr>
-                        <tr>
-                          <td className="py-2 pr-4 font-medium">Exhibitions</td>
-                          <td>{application.data.exhibitions?.length || 0} entries</td>
-                        </tr>
-                        <tr>
-                          <td className="py-2 pr-4 font-medium">Leading Roles</td>
-                          <td>{application.data.leadingRoles?.length || 0} entries</td>
-                        </tr>
-                        <tr>
-                          <td className="py-2 pr-4 font-medium">High Salaries</td>
-                          <td>{application.data.highSalaries?.length || 0} entries</td>
-                        </tr>
-                        <tr>
-                          <td className="py-2 pr-4 font-medium">Commercial Successes</td>
-                          <td>{application.data.commercialSuccesses?.length || 0} entries</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="awards" className="mt-0">
-                <h3 className="mb-4 text-lg font-medium">Prizes & Awards</h3>
-                {application.data.awards && application.data.awards.length > 0 ? (
-                  <div className="space-y-4">
-                    {application.data.awards.map((award, index) => (
-                      <Card key={award.id || index}>
-                        <CardContent className="p-4">
-                          <h4 className="font-bold">{award.awardName}</h4>
-                          <p className="text-sm text-gray-500">
-                            {award.awardingOrganization} • {award.dateReceived}
-                          </p>
-                          <p className="mt-2">{award.awardDescription}</p>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground">No awards or prizes submitted.</p>
-                )}
-              </TabsContent>
-              
-              <TabsContent value="memberships" className="mt-0">
-                <h3 className="mb-4 text-lg font-medium">Memberships</h3>
-                {application.data.memberships && application.data.memberships.length > 0 ? (
-                  <div className="space-y-4">
-                    {application.data.memberships.map((membership, index) => (
-                      <Card key={membership.id || index}>
-                        <CardContent className="p-4">
-                          <h4 className="font-bold">{membership.associationName}</h4>
-                          <p className="text-sm text-gray-500">Member since {membership.memberSince}</p>
-                          <p className="mt-2">{membership.associationDescription}</p>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground">No memberships submitted.</p>
-                )}
-              </TabsContent>
-              
-              <TabsContent value="publications" className="mt-0">
-                <h3 className="mb-4 text-lg font-medium">Published Materials</h3>
-                {application.data.publishedMaterials && application.data.publishedMaterials.length > 0 ? (
-                  <div className="space-y-4">
-                    {application.data.publishedMaterials.map((publication, index) => (
-                      <Card key={publication.id || index}>
-                        <CardContent className="p-4">
-                          <h4 className="font-bold">{publication.publicationTitle}</h4>
-                          <p className="text-sm text-gray-500">
-                            {publication.publisherName} • {publication.publicationDate}
-                          </p>
-                          <p className="mt-2">{publication.contentSummary}</p>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground">No published materials submitted.</p>
-                )}
-              </TabsContent>
-              
-              <TabsContent value="other" className="mt-0">
-                <h3 className="mb-4 text-lg font-medium">Other Criteria</h3>
-                <p className="text-muted-foreground mb-4">
-                  View detailed information for each criterion by selecting the specific tab.
-                </p>
+                </TabsContent>
                 
-                <div className="grid gap-4 md:grid-cols-2">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setActiveTab('awards')}
-                    className="justify-start"
-                  >
-                    Prizes & Awards
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setActiveTab('memberships')}
-                    className="justify-start"
-                  >
-                    Memberships
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setActiveTab('publications')}
-                    className="justify-start"
-                  >
-                    Published Materials
-                  </Button>
-                </div>
-              </TabsContent>
+                <TabsContent value="awards" className="mt-0">
+                  <h3 className="mb-4 text-lg font-medium">Prizes & Awards</h3>
+                  {application.data.awards && application.data.awards.length > 0 ? (
+                    <div className="space-y-4">
+                      {application.data.awards.map((award, index) => (
+                        <Card key={award.id || index}>
+                          <CardContent className="p-4">
+                            <h4 className="font-bold">{award.awardName}</h4>
+                            <p className="text-sm text-gray-500">
+                              {award.awardingOrganization} • {award.dateReceived}
+                            </p>
+                            <p className="mt-2">{award.awardDescription}</p>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">No awards or prizes submitted.</p>
+                  )}
+                </TabsContent>
+                
+                <TabsContent value="memberships" className="mt-0">
+                  <h3 className="mb-4 text-lg font-medium">Memberships</h3>
+                  {application.data.memberships && application.data.memberships.length > 0 ? (
+                    <div className="space-y-4">
+                      {application.data.memberships.map((membership, index) => (
+                        <Card key={membership.id || index}>
+                          <CardContent className="p-4">
+                            <h4 className="font-bold">{membership.associationName}</h4>
+                            <p className="text-sm text-gray-500">Member since {membership.memberSince}</p>
+                            <p className="mt-2">{membership.associationDescription}</p>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">No memberships submitted.</p>
+                  )}
+                </TabsContent>
+                
+                <TabsContent value="publications" className="mt-0">
+                  <h3 className="mb-4 text-lg font-medium">Published Materials</h3>
+                  {application.data.publishedMaterials && application.data.publishedMaterials.length > 0 ? (
+                    <div className="space-y-4">
+                      {application.data.publishedMaterials.map((publication, index) => (
+                        <Card key={publication.id || index}>
+                          <CardContent className="p-4">
+                            <h4 className="font-bold">{publication.publicationTitle}</h4>
+                            <p className="text-sm text-gray-500">
+                              {publication.publisherName} • {publication.publicationDate}
+                            </p>
+                            <p className="mt-2">{publication.contentSummary}</p>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">No published materials submitted.</p>
+                  )}
+                </TabsContent>
+                
+                <TabsContent value="other" className="mt-0">
+                  <h3 className="mb-4 text-lg font-medium">Other Criteria</h3>
+                  <p className="text-muted-foreground mb-4">
+                    View detailed information for each criterion by selecting the specific tab.
+                  </p>
+                  
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setActiveTab('awards')}
+                      className="justify-start"
+                    >
+                      Prizes & Awards
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setActiveTab('memberships')}
+                      className="justify-start"
+                    >
+                      Memberships
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setActiveTab('publications')}
+                      className="justify-start"
+                    >
+                      Published Materials
+                    </Button>
+                  </div>
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
         </div>
