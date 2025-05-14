@@ -88,7 +88,7 @@ const Index = () => {
 
       {/* Footer */}
       <footer className="mt-auto bg-gray-100 py-6 text-center text-sm text-gray-600">
-        <p>© 2025 EB1A Application Navigator. All rights reserved.</p>
+        <p>© 2025 StraightGreenCard EB1A Application Navigator. All rights reserved.</p>
       </footer>
     </div>
   );
