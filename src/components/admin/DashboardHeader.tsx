@@ -13,7 +13,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ userEmail, onLogout }
   const isMobile = useIsMobile();
   
   return (
-    <header className="bg-navy-800 text-white">
+    <header className="bg-white text-navy-800">
       <div className="container mx-auto p-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center">
