@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from './button';
 import { Input } from './input';
@@ -5,6 +6,7 @@ import { Label } from './label';
 import { X, Upload, Check } from 'lucide-react';
 import { uploadFile } from '@/lib/supabase';
 import { Spinner } from './spinner';
+import { toast } from '@/components/ui/use-toast';
 
 interface FileUploadProps {
   id: string;
@@ -43,6 +45,11 @@ export function FileUpload({
     // Check file size
     if (file.size > maxSize * 1024 * 1024) {
       setError(`File size exceeds the limit of ${maxSize}MB`);
+      toast({
+        variant: "destructive",
+        title: "File too large",
+        description: `File size exceeds the limit of ${maxSize}MB`
+      });
       return;
     }
 
@@ -69,8 +76,7 @@ export function FileUpload({
         file,
         (progress) => {
           console.log(`Upload progress: ${progress}%`);
-          // This won't actually be called with the current implementation,
-          // but we're keeping the parameter for future compatibility
+          setUploadProgress(progress);
         }
       );
       
@@ -80,12 +86,26 @@ export function FileUpload({
       if (fileUrl) {
         onChange(fileUrl);
         setFileName(file.name);
+        toast({
+          title: "File uploaded successfully",
+          description: "Your file has been uploaded and attached to the form."
+        });
       } else {
         setError('Failed to upload file. Please try again.');
+        toast({
+          variant: "destructive",
+          title: "Upload failed",
+          description: "Failed to upload file. Please try again."
+        });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading file:', error);
       setError('An error occurred during upload. Please try again.');
+      toast({
+        variant: "destructive",
+        title: "Upload error",
+        description: error.message || "An error occurred during upload"
+      });
     } finally {
       setIsUploading(false);
     }
@@ -95,6 +115,10 @@ export function FileUpload({
     onChange(undefined);
     setFileName(null);
     setError(null);
+    toast({
+      title: "File removed",
+      description: "The file has been removed from the form."
+    });
   };
 
   return (

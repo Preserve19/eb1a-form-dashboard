@@ -50,7 +50,9 @@ export const uploadFile = async (
     // Upload the file
     const { data, error } = await supabase.storage
       .from(bucketName)
-      .upload(filePath, file, { upsert: true });
+      .upload(filePath, file, { 
+        upsert: true
+      });
       
     if (error) {
       throw error;
@@ -58,7 +60,7 @@ export const uploadFile = async (
     
     // If there's a progress callback, simulate progress
     if (onProgress) {
-      // We'll call it with 100% when upload is complete
+      // Call it with 100% when upload is complete
       onProgress(100);
     }
     
