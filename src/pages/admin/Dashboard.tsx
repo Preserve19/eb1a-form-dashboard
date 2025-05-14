@@ -80,7 +80,7 @@ const Dashboard = () => {
       
       {/* Footer */}
       <footer className="border-t bg-white py-4 text-center text-sm text-gray-500">
-        <p>© 2025 EB1A Application Navigator Admin Panel</p>
+        <p>© 2025 StraightGreenCard EB1A Application Navigator Admin Panel</p>
       </footer>
     </div>
   );
