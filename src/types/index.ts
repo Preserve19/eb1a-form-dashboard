@@ -1,9 +1,9 @@
-
 // Base Types
 export interface BaseFormData {
   id?: string;
   fullName: string;
   email: string;
+  phone?: string; // Add phone property as optional
   status: 'draft' | 'submitted';
   createdAt?: string;
   updatedAt?: string;
@@ -197,4 +197,3 @@ export interface FormSummary {
   updatedAt: string;
   submittedAt?: string;
 }
-
