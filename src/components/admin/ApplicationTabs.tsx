@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -56,10 +57,15 @@ const ApplicationTabs: React.FC<ApplicationTabsProps> = ({
                   key={award.id}
                   title={award.awardName}
                   subtitle={`${award.awardingOrganization} • ${award.dateReceived}`}
-                  description={award.awardDescription}
+                  fields={[
+                    { label: "Award Name", value: award.awardName },
+                    { label: "Awarding Organization", value: award.awardingOrganization },
+                    { label: "Date Received", value: award.dateReceived },
+                    { label: "Description", value: award.awardDescription }
+                  ]}
                   links={[
-                    ...(award.certificateUrl ? [{ url: award.certificateUrl, label: 'View Certificate' }] : []),
-                    ...(award.supportingDocUrl ? [{ url: award.supportingDocUrl, label: 'View Supporting Document' }] : [])
+                    ...(award.certificateUrl ? [{ url: award.certificateUrl, label: 'Award Certificate' }] : []),
+                    ...(award.supportingDocUrl ? [{ url: award.supportingDocUrl, label: 'Supporting Document' }] : [])
                   ]}
                 />
               )}
@@ -75,10 +81,14 @@ const ApplicationTabs: React.FC<ApplicationTabsProps> = ({
                   key={membership.id}
                   title={membership.associationName}
                   subtitle={`Member since ${membership.memberSince}`}
-                  description={membership.associationDescription}
+                  fields={[
+                    { label: "Association Name", value: membership.associationName },
+                    { label: "Member Since", value: membership.memberSince },
+                    { label: "Association Description", value: membership.associationDescription }
+                  ]}
                   links={[
-                    ...(membership.certificateUrl ? [{ url: membership.certificateUrl, label: 'View Certificate' }] : []),
-                    ...(membership.supportingDocUrl ? [{ url: membership.supportingDocUrl, label: 'View Supporting Document' }] : [])
+                    ...(membership.certificateUrl ? [{ url: membership.certificateUrl, label: 'Membership Certificate' }] : []),
+                    ...(membership.supportingDocUrl ? [{ url: membership.supportingDocUrl, label: 'Supporting Document' }] : [])
                   ]}
                 />
               )}
@@ -94,10 +104,15 @@ const ApplicationTabs: React.FC<ApplicationTabsProps> = ({
                   key={publication.id}
                   title={publication.publicationTitle}
                   subtitle={`${publication.publisherName} • ${publication.publicationDate}`}
-                  description={publication.contentSummary}
+                  fields={[
+                    { label: "Publication Title", value: publication.publicationTitle },
+                    { label: "Publisher", value: publication.publisherName },
+                    { label: "Publication Date", value: publication.publicationDate },
+                    { label: "Content Summary", value: publication.contentSummary }
+                  ]}
                   links={[
                     ...(publication.publicationUrl ? [{ url: publication.publicationUrl, label: 'View Publication' }] : []),
-                    ...(publication.evidenceUrl ? [{ url: publication.evidenceUrl, label: 'View Evidence' }] : [])
+                    ...(publication.evidenceUrl ? [{ url: publication.evidenceUrl, label: 'Publication Evidence' }] : [])
                   ]}
                 />
               )}
@@ -113,10 +128,15 @@ const ApplicationTabs: React.FC<ApplicationTabsProps> = ({
                   key={exp.id}
                   title={exp.judgeRole}
                   subtitle={`${exp.organizationName} • ${exp.startDate} ${exp.endDate ? `to ${exp.endDate}` : 'to Present'}`}
-                  description={exp.description}
+                  fields={[
+                    { label: "Judge Role", value: exp.judgeRole },
+                    { label: "Organization", value: exp.organizationName },
+                    { label: "Time Period", value: `${exp.startDate} ${exp.endDate ? `to ${exp.endDate}` : 'to Present'}` },
+                    { label: "Description", value: exp.description }
+                  ]}
                   links={[
-                    ...(exp.appointmentLetterUrl ? [{ url: exp.appointmentLetterUrl, label: 'View Appointment Letter' }] : []),
-                    ...(exp.evidenceUrl ? [{ url: exp.evidenceUrl, label: 'View Evidence' }] : [])
+                    ...(exp.appointmentLetterUrl ? [{ url: exp.appointmentLetterUrl, label: 'Appointment Letter' }] : []),
+                    ...(exp.evidenceUrl ? [{ url: exp.evidenceUrl, label: 'Supporting Evidence' }] : [])
                   ]}
                 />
               )}
@@ -132,10 +152,15 @@ const ApplicationTabs: React.FC<ApplicationTabsProps> = ({
                   key={contrib.id}
                   title={contrib.contributionTitle}
                   subtitle={`${contrib.field} • ${contrib.contributionDate}`}
-                  description={contrib.description}
+                  fields={[
+                    { label: "Contribution Title", value: contrib.contributionTitle },
+                    { label: "Field", value: contrib.field },
+                    { label: "Date", value: contrib.contributionDate },
+                    { label: "Description", value: contrib.description }
+                  ]}
                   links={[
-                    ...(contrib.evidenceUrl ? [{ url: contrib.evidenceUrl, label: 'View Evidence' }] : []),
-                    ...(contrib.lettersUrl ? [{ url: contrib.lettersUrl, label: 'View Support Letters' }] : [])
+                    ...(contrib.evidenceUrl ? [{ url: contrib.evidenceUrl, label: 'Evidence Document' }] : []),
+                    ...(contrib.lettersUrl ? [{ url: contrib.lettersUrl, label: 'Support Letters' }] : [])
                   ]}
                 />
               )}
@@ -151,10 +176,15 @@ const ApplicationTabs: React.FC<ApplicationTabsProps> = ({
                   key={article.id}
                   title={article.articleTitle}
                   subtitle={`${article.journalName} • ${article.publicationDate}`}
-                  description={article.abstract}
+                  fields={[
+                    { label: "Article Title", value: article.articleTitle },
+                    { label: "Journal Name", value: article.journalName },
+                    { label: "Publication Date", value: article.publicationDate },
+                    { label: "Abstract", value: article.abstract }
+                  ]}
                   links={[
-                    ...(article.articleUrl ? [{ url: article.articleUrl, label: 'View Article' }] : []),
-                    ...(article.citationUrl ? [{ url: article.citationUrl, label: 'View Citations' }] : [])
+                    ...(article.articleUrl ? [{ url: article.articleUrl, label: 'Full Article' }] : []),
+                    ...(article.citationUrl ? [{ url: article.citationUrl, label: 'Citation Evidence' }] : [])
                   ]}
                 />
               )}
@@ -170,11 +200,16 @@ const ApplicationTabs: React.FC<ApplicationTabsProps> = ({
                   key={exhibition.id}
                   title={exhibition.exhibitionName}
                   subtitle={`${exhibition.venueName}, ${exhibition.venueLocation} • ${exhibition.startDate} ${exhibition.endDate ? `to ${exhibition.endDate}` : ''}`}
-                  description={exhibition.exhibitionDescription}
+                  fields={[
+                    { label: "Exhibition Name", value: exhibition.exhibitionName },
+                    { label: "Venue", value: `${exhibition.venueName}, ${exhibition.venueLocation}` },
+                    { label: "Dates", value: `${exhibition.startDate} ${exhibition.endDate ? `to ${exhibition.endDate}` : ''}` },
+                    { label: "Exhibition Description", value: exhibition.exhibitionDescription }
+                  ]}
                   links={[
-                    ...(exhibition.exhibitionDocUrl ? [{ url: exhibition.exhibitionDocUrl, label: 'View Exhibition Doc' }] : []),
-                    ...(exhibition.visualEvidenceUrl ? [{ url: exhibition.visualEvidenceUrl, label: 'View Visual Evidence' }] : []),
-                    ...(exhibition.reviewsUrl ? [{ url: exhibition.reviewsUrl, label: 'View Reviews' }] : [])
+                    ...(exhibition.exhibitionDocUrl ? [{ url: exhibition.exhibitionDocUrl, label: 'Exhibition Documentation' }] : []),
+                    ...(exhibition.visualEvidenceUrl ? [{ url: exhibition.visualEvidenceUrl, label: 'Visual Evidence' }] : []),
+                    ...(exhibition.reviewsUrl ? [{ url: exhibition.reviewsUrl, label: 'Reviews' }] : [])
                   ]}
                 />
               )}
@@ -190,10 +225,15 @@ const ApplicationTabs: React.FC<ApplicationTabsProps> = ({
                   key={role.id}
                   title={role.roleTitle}
                   subtitle={`${role.organizationName} • ${role.startDate} ${role.endDate ? `to ${role.endDate}` : 'to Present'}`}
-                  description={role.responsibilities}
+                  fields={[
+                    { label: "Role Title", value: role.roleTitle },
+                    { label: "Organization", value: role.organizationName },
+                    { label: "Period", value: `${role.startDate} ${role.endDate ? `to ${role.endDate}` : 'to Present'}` },
+                    { label: "Responsibilities", value: role.responsibilities }
+                  ]}
                   links={[
-                    ...(role.verificationUrl ? [{ url: role.verificationUrl, label: 'View Verification' }] : []),
-                    ...(role.organizationChartUrl ? [{ url: role.organizationChartUrl, label: 'View Org Chart' }] : [])
+                    ...(role.verificationUrl ? [{ url: role.verificationUrl, label: 'Role Verification' }] : []),
+                    ...(role.organizationChartUrl ? [{ url: role.organizationChartUrl, label: 'Organization Chart' }] : [])
                   ]}
                 />
               )}
@@ -209,11 +249,16 @@ const ApplicationTabs: React.FC<ApplicationTabsProps> = ({
                   key={salary.id}
                   title={salary.employerName}
                   subtitle={`${salary.baseSalary} ${salary.currency} ${salary.frequency} • ${salary.startDate} ${salary.endDate ? `to ${salary.endDate}` : 'to Present'}`}
-                  description={salary.additionalCompensation}
+                  fields={[
+                    { label: "Employer", value: salary.employerName },
+                    { label: "Base Salary", value: `${salary.baseSalary} ${salary.currency} ${salary.frequency}` },
+                    { label: "Employment Period", value: `${salary.startDate} ${salary.endDate ? `to ${salary.endDate}` : 'to Present'}` },
+                    { label: "Additional Compensation", value: salary.additionalCompensation || 'None' }
+                  ]}
                   links={[
-                    ...(salary.salaryDocUrl ? [{ url: salary.salaryDocUrl, label: 'View Salary Documents' }] : []),
-                    ...(salary.industryEvidenceUrl ? [{ url: salary.industryEvidenceUrl, label: 'View Industry Evidence' }] : []),
-                    ...(salary.expertLettersUrl ? [{ url: salary.expertLettersUrl, label: 'View Expert Letters' }] : [])
+                    ...(salary.salaryDocUrl ? [{ url: salary.salaryDocUrl, label: 'Salary Documentation' }] : []),
+                    ...(salary.industryEvidenceUrl ? [{ url: salary.industryEvidenceUrl, label: 'Industry Comparison' }] : []),
+                    ...(salary.expertLettersUrl ? [{ url: salary.expertLettersUrl, label: 'Expert Letters' }] : [])
                   ]}
                 />
               )}
@@ -229,10 +274,16 @@ const ApplicationTabs: React.FC<ApplicationTabsProps> = ({
                   key={success.id}
                   title={success.projectTitle}
                   subtitle={`${success.projectType} • ${success.role} • Released ${success.releaseDate}`}
-                  description={success.metrics}
+                  fields={[
+                    { label: "Project Title", value: success.projectTitle },
+                    { label: "Project Type", value: success.projectType },
+                    { label: "Your Role", value: success.role },
+                    { label: "Release Date", value: success.releaseDate },
+                    { label: "Success Metrics", value: success.metrics }
+                  ]}
                   links={[
-                    ...(success.salesDocUrl ? [{ url: success.salesDocUrl, label: 'View Sales Documents' }] : []),
-                    ...(success.mediaCoverageUrl ? [{ url: success.mediaCoverageUrl, label: 'View Media Coverage' }] : [])
+                    ...(success.salesDocUrl ? [{ url: success.salesDocUrl, label: 'Sales Documentation' }] : []),
+                    ...(success.mediaCoverageUrl ? [{ url: success.mediaCoverageUrl, label: 'Media Coverage' }] : [])
                   ]}
                 />
               )}
@@ -243,13 +294,5 @@ const ApplicationTabs: React.FC<ApplicationTabsProps> = ({
     </Card>
   );
 };
-
-// We need to keep EntryCard here to be used in ApplicationTabs
-interface EntryCard {
-  title: string;
-  subtitle: string;
-  description: string;
-  links: Array<{ url: string; label: string }>;
-}
 
 export default ApplicationTabs;

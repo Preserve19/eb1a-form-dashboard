@@ -20,35 +20,44 @@ export const EntryCard = ({ title, subtitle, description, fields, links }: Entry
   return (
     <Card>
       <CardContent className="p-4">
-        <h4 className="font-bold">{title}</h4>
-        <p className="text-sm text-gray-500">{subtitle}</p>
-        {description && <p className="mt-2">{description}</p>}
+        <h4 className="font-bold text-lg">{title}</h4>
+        <p className="text-sm text-gray-500 mb-3">{subtitle}</p>
+        
+        {description && (
+          <div className="mb-3">
+            <p className="text-sm font-medium text-gray-600">Description:</p>
+            <p className="mt-1">{description}</p>
+          </div>
+        )}
         
         {fields && fields.length > 0 && (
-          <div className="mt-2">
+          <div className="mt-2 space-y-3">
             {fields.map((field, idx) => (
               <div key={idx} className="mt-1">
-                <p className="text-sm font-medium text-gray-500">{field.label}</p>
-                <p className="text-gray-900">{field.value}</p>
+                <p className="text-sm font-medium text-gray-600">{field.label}:</p>
+                <p className="text-gray-900 mt-1">{field.value}</p>
               </div>
             ))}
           </div>
         )}
         
         {links && links.length > 0 && (
-          <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
-            {links.map((link, idx) => (
-              <a 
-                key={idx}
-                href={link.url} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
-              >
-                <Download className="mr-1 inline h-4 w-4" />
-                {link.label}
-              </a>
-            ))}
+          <div className="mt-4 border-t pt-3">
+            <p className="text-sm font-medium text-gray-600 mb-2">Supporting Documents:</p>
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+              {links.map((link, idx) => (
+                <a 
+                  key={idx}
+                  href={link.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center text-blue-600 hover:underline hover:text-blue-800 transition-colors"
+                >
+                  <Download className="mr-1 inline h-4 w-4" />
+                  {link.label}
+                </a>
+              ))}
+            </div>
           </div>
         )}
       </CardContent>
