@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { EB1AFormData } from '@/types';
 import ApplicationOverview from '@/components/admin/ApplicationOverview';
-import EntryCardList from '@/components/admin/EntryCardList';
+import EntryCardList, { EntryCard } from '@/components/admin/EntryCardList';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ApplicationTabsProps {

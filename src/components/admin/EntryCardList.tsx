@@ -7,12 +7,13 @@ interface LinkData {
   label: string;
 }
 
-interface EntryCardProps {
+export interface EntryCardProps {
   title: string;
   subtitle: string;
   description?: string;
   fields?: { label: string; value: string }[];
   links?: LinkData[];
+  key?: string | number;
 }
 
 export const EntryCard = ({ title, subtitle, description, fields, links }: EntryCardProps) => {
