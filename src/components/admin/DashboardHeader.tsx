@@ -22,6 +22,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ userEmail, onLogout }
               alt="StraightGreenCard Logo" 
               className="h-8 mr-3" 
             />
+            <br/>
             <h1 className="text-xl sm:text-2xl font-bold">StraightGreenCard EB1A Admin Dashboard</h1>
           </div>
           <div className="flex items-center gap-3">
