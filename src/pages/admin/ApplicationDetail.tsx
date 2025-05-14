@@ -1,15 +1,19 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Download, User, Calendar, Mail, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
+import { ArrowLeft, Download } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Spinner } from '@/components/ui/spinner';
 import { supabase, downloadApplicationDetail } from '@/lib/supabase';
 import { toast } from '@/components/ui/use-toast';
 import { EB1AFormData } from '@/types';
+import ApplicantInfoCard from '@/components/admin/ApplicantInfoCard';
+import ApplicationOverview from '@/components/admin/ApplicationOverview';
+import ApplicationNotFound from '@/components/admin/ApplicationNotFound';
+import EntryCardList, { EntryCard } from '@/components/admin/EntryCardList';
 
 interface FormRecord {
   id: string;
@@ -103,26 +107,7 @@ const ApplicationDetail = () => {
   }
   
   if (!application) {
-    return (
-      <div className="container mx-auto p-8">
-        <div className="mb-6 flex items-center">
-          <Button variant="ghost" onClick={handleBack}>
-            <ArrowLeft className="mr-2" size={16} />
-            Back to Dashboard
-          </Button>
-        </div>
-        
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center p-12">
-            <AlertCircle className="mb-4 h-16 w-16 text-gray-300" />
-            <h2 className="mb-2 text-2xl font-bold">Application Not Found</h2>
-            <p className="text-muted-foreground">
-              The application you're looking for doesn't exist or has been removed.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    return <ApplicationNotFound onBack={handleBack} />;
   }
   
   return (
@@ -136,73 +121,15 @@ const ApplicationDetail = () => {
       </div>
       
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle>Applicant Information</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-start gap-3">
-              <User className="mt-0.5 h-5 w-5 text-gray-400" />
-              <div>
-                <p className="font-medium">{application.data.fullName}</p>
-                <p className="text-sm text-muted-foreground">Applicant Name</p>
-              </div>
-            </div>
-            
-            <div className="flex items-start gap-3">
-              <Mail className="mt-0.5 h-5 w-5 text-gray-400" />
-              <div>
-                <p className="font-medium">{application.data.email}</p>
-                <p className="text-sm text-muted-foreground">Email Address</p>
-              </div>
-            </div>
-            
-            <div className="flex items-start gap-3">
-              <Calendar className="mt-0.5 h-5 w-5 text-gray-400" />
-              <div>
-                <p className="font-medium">
-                  {format(new Date(application.created_at), 'PPP')}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Created {format(new Date(application.created_at), 'p')}
-                </p>
-              </div>
-            </div>
-            
-            {application.submitted_at && (
-              <div className="flex items-start gap-3">
-                <Calendar className="mt-0.5 h-5 w-5 text-green-500" />
-                <div>
-                  <p className="font-medium text-green-600">
-                    {format(new Date(application.submitted_at), 'PPP')}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Submitted {format(new Date(application.submitted_at), 'p')}
-                  </p>
-                </div>
-              </div>
-            )}
-            
-            <div className="pt-4">
-              <Button 
-                className="w-full" 
-                variant="outline"
-                onClick={handleDownload}
-                disabled={isDownloading}
-              >
-                {isDownloading ? (
-                  <>
-                    <Spinner size="sm" className="mr-2" /> Downloading...
-                  </>
-                ) : (
-                  <>
-                    <Download className="mr-2 h-4 w-4" /> Download Full Application
-                  </>
-                )}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <ApplicantInfoCard 
+          fullName={application.data.fullName}
+          email={application.data.email}
+          createdAt={application.created_at}
+          submittedAt={application.submitted_at}
+          id={application.id}
+          isDownloading={isDownloading}
+          onDownload={handleDownload}
+        />
         
         <div className="lg:col-span-2">
           <Card>
@@ -227,536 +154,199 @@ const ApplicationDetail = () => {
             <CardContent className="p-6">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsContent value="details" className="mt-0">
-                  <div className="space-y-6">
-                    <div>
-                      <h3 className="mb-2 text-lg font-medium">Application Status</h3>
-                      <div className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${
-                        application.status === 'submitted' 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-amber-100 text-amber-800'
-                      }`}>
-                        {application.status === 'submitted' ? 'Submitted' : 'Draft'}
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <h3 className="mb-2 text-lg font-medium">Submission Summary</h3>
-                      <table className="w-full text-sm">
-                        <tbody>
-                          <tr>
-                            <td className="py-2 pr-4 font-medium">Prizes & Awards</td>
-                            <td>{application.data.awards?.length || 0} entries</td>
-                          </tr>
-                          <tr>
-                            <td className="py-2 pr-4 font-medium">Memberships</td>
-                            <td>{application.data.memberships?.length || 0} entries</td>
-                          </tr>
-                          <tr>
-                            <td className="py-2 pr-4 font-medium">Published Materials</td>
-                            <td>{application.data.publishedMaterials?.length || 0} entries</td>
-                          </tr>
-                          <tr>
-                            <td className="py-2 pr-4 font-medium">Judging Experience</td>
-                            <td>{application.data.judgingExperiences?.length || 0} entries</td>
-                          </tr>
-                          <tr>
-                            <td className="py-2 pr-4 font-medium">Original Contributions</td>
-                            <td>{application.data.originalContributions?.length || 0} entries</td>
-                          </tr>
-                          <tr>
-                            <td className="py-2 pr-4 font-medium">Scholarly Articles</td>
-                            <td>{application.data.scholarlyArticles?.length || 0} entries</td>
-                          </tr>
-                          <tr>
-                            <td className="py-2 pr-4 font-medium">Exhibitions</td>
-                            <td>{application.data.exhibitions?.length || 0} entries</td>
-                          </tr>
-                          <tr>
-                            <td className="py-2 pr-4 font-medium">Leading Roles</td>
-                            <td>{application.data.leadingRoles?.length || 0} entries</td>
-                          </tr>
-                          <tr>
-                            <td className="py-2 pr-4 font-medium">High Salaries</td>
-                            <td>{application.data.highSalaries?.length || 0} entries</td>
-                          </tr>
-                          <tr>
-                            <td className="py-2 pr-4 font-medium">Commercial Successes</td>
-                            <td>{application.data.commercialSuccesses?.length || 0} entries</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
+                  <ApplicationOverview status={application.status} formData={application.data} />
                 </TabsContent>
                 
                 <TabsContent value="awards" className="mt-0">
-                  <h3 className="mb-4 text-lg font-medium">Prizes & Awards</h3>
-                  {application.data.awards && application.data.awards.length > 0 ? (
-                    <div className="space-y-4">
-                      {application.data.awards.map((award, index) => (
-                        <Card key={award.id || index}>
-                          <CardContent className="p-4">
-                            <h4 className="font-bold">{award.awardName}</h4>
-                            <p className="text-sm text-gray-500">
-                              {award.awardingOrganization} • {award.dateReceived}
-                            </p>
-                            <p className="mt-2">{award.awardDescription}</p>
-                            <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
-                              {award.certificateUrl && (
-                                <a 
-                                  href={award.certificateUrl} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 hover:underline"
-                                >
-                                  <Download className="mr-1 inline h-4 w-4" />
-                                  View Certificate
-                                </a>
-                              )}
-                              {award.supportingDocUrl && (
-                                <a 
-                                  href={award.supportingDocUrl} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 hover:underline"
-                                >
-                                  <Download className="mr-1 inline h-4 w-4" />
-                                  View Supporting Document
-                                </a>
-                              )}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-muted-foreground">No awards or prizes submitted.</p>
-                  )}
+                  <EntryCardList 
+                    title="Prizes & Awards"
+                    entries={application.data.awards}
+                    renderEntry={(award) => (
+                      <EntryCard 
+                        key={award.id}
+                        title={award.awardName}
+                        subtitle={`${award.awardingOrganization} • ${award.dateReceived}`}
+                        description={award.awardDescription}
+                        links={[
+                          ...(award.certificateUrl ? [{ url: award.certificateUrl, label: 'View Certificate' }] : []),
+                          ...(award.supportingDocUrl ? [{ url: award.supportingDocUrl, label: 'View Supporting Document' }] : [])
+                        ]}
+                      />
+                    )}
+                  />
                 </TabsContent>
                 
                 <TabsContent value="memberships" className="mt-0">
-                  <h3 className="mb-4 text-lg font-medium">Memberships</h3>
-                  {application.data.memberships && application.data.memberships.length > 0 ? (
-                    <div className="space-y-4">
-                      {application.data.memberships.map((membership, index) => (
-                        <Card key={membership.id || index}>
-                          <CardContent className="p-4">
-                            <h4 className="font-bold">{membership.associationName}</h4>
-                            <p className="text-sm text-gray-500">Member since {membership.memberSince}</p>
-                            <p className="mt-2">{membership.associationDescription}</p>
-                            <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
-                              {membership.certificateUrl && (
-                                <a 
-                                  href={membership.certificateUrl} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 hover:underline"
-                                >
-                                  <Download className="mr-1 inline h-4 w-4" />
-                                  View Certificate
-                                </a>
-                              )}
-                              {membership.supportingDocUrl && (
-                                <a 
-                                  href={membership.supportingDocUrl} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 hover:underline"
-                                >
-                                  <Download className="mr-1 inline h-4 w-4" />
-                                  View Supporting Document
-                                </a>
-                              )}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-muted-foreground">No memberships submitted.</p>
-                  )}
+                  <EntryCardList 
+                    title="Memberships"
+                    entries={application.data.memberships}
+                    renderEntry={(membership) => (
+                      <EntryCard 
+                        key={membership.id}
+                        title={membership.associationName}
+                        subtitle={`Member since ${membership.memberSince}`}
+                        description={membership.associationDescription}
+                        links={[
+                          ...(membership.certificateUrl ? [{ url: membership.certificateUrl, label: 'View Certificate' }] : []),
+                          ...(membership.supportingDocUrl ? [{ url: membership.supportingDocUrl, label: 'View Supporting Document' }] : [])
+                        ]}
+                      />
+                    )}
+                  />
                 </TabsContent>
                 
                 <TabsContent value="publications" className="mt-0">
-                  <h3 className="mb-4 text-lg font-medium">Published Materials</h3>
-                  {application.data.publishedMaterials && application.data.publishedMaterials.length > 0 ? (
-                    <div className="space-y-4">
-                      {application.data.publishedMaterials.map((publication, index) => (
-                        <Card key={publication.id || index}>
-                          <CardContent className="p-4">
-                            <h4 className="font-bold">{publication.publicationTitle}</h4>
-                            <p className="text-sm text-gray-500">
-                              {publication.publisherName} • {publication.publicationDate}
-                            </p>
-                            <p className="mt-2">{publication.contentSummary}</p>
-                            <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
-                              {publication.publicationUrl && (
-                                <a 
-                                  href={publication.publicationUrl} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 hover:underline"
-                                >
-                                  <Download className="mr-1 inline h-4 w-4" />
-                                  View Publication
-                                </a>
-                              )}
-                              {publication.evidenceUrl && (
-                                <a 
-                                  href={publication.evidenceUrl} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 hover:underline"
-                                >
-                                  <Download className="mr-1 inline h-4 w-4" />
-                                  View Evidence
-                                </a>
-                              )}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-muted-foreground">No published materials submitted.</p>
-                  )}
+                  <EntryCardList 
+                    title="Published Materials"
+                    entries={application.data.publishedMaterials}
+                    renderEntry={(publication) => (
+                      <EntryCard 
+                        key={publication.id}
+                        title={publication.publicationTitle}
+                        subtitle={`${publication.publisherName} • ${publication.publicationDate}`}
+                        description={publication.contentSummary}
+                        links={[
+                          ...(publication.publicationUrl ? [{ url: publication.publicationUrl, label: 'View Publication' }] : []),
+                          ...(publication.evidenceUrl ? [{ url: publication.evidenceUrl, label: 'View Evidence' }] : [])
+                        ]}
+                      />
+                    )}
+                  />
                 </TabsContent>
                 
                 <TabsContent value="judging" className="mt-0">
-                  <h3 className="mb-4 text-lg font-medium">Judging Experiences</h3>
-                  {application.data.judgingExperiences && application.data.judgingExperiences.length > 0 ? (
-                    <div className="space-y-4">
-                      {application.data.judgingExperiences.map((exp, index) => (
-                        <Card key={exp.id || index}>
-                          <CardContent className="p-4">
-                            <h4 className="font-bold">{exp.judgeRole}</h4>
-                            <p className="text-sm text-gray-500">
-                              {exp.organizationName} • {exp.startDate} {exp.endDate ? `to ${exp.endDate}` : 'to Present'}
-                            </p>
-                            <p className="mt-2">{exp.description}</p>
-                            <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
-                              {exp.appointmentLetterUrl && (
-                                <a 
-                                  href={exp.appointmentLetterUrl} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 hover:underline"
-                                >
-                                  <Download className="mr-1 inline h-4 w-4" />
-                                  View Appointment Letter
-                                </a>
-                              )}
-                              {exp.evidenceUrl && (
-                                <a 
-                                  href={exp.evidenceUrl} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 hover:underline"
-                                >
-                                  <Download className="mr-1 inline h-4 w-4" />
-                                  View Evidence
-                                </a>
-                              )}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-muted-foreground">No judging experiences submitted.</p>
-                  )}
+                  <EntryCardList 
+                    title="Judging Experiences"
+                    entries={application.data.judgingExperiences}
+                    renderEntry={(exp) => (
+                      <EntryCard 
+                        key={exp.id}
+                        title={exp.judgeRole}
+                        subtitle={`${exp.organizationName} • ${exp.startDate} ${exp.endDate ? `to ${exp.endDate}` : 'to Present'}`}
+                        description={exp.description}
+                        links={[
+                          ...(exp.appointmentLetterUrl ? [{ url: exp.appointmentLetterUrl, label: 'View Appointment Letter' }] : []),
+                          ...(exp.evidenceUrl ? [{ url: exp.evidenceUrl, label: 'View Evidence' }] : [])
+                        ]}
+                      />
+                    )}
+                  />
                 </TabsContent>
                 
                 <TabsContent value="contributions" className="mt-0">
-                  <h3 className="mb-4 text-lg font-medium">Original Contributions</h3>
-                  {application.data.originalContributions && application.data.originalContributions.length > 0 ? (
-                    <div className="space-y-4">
-                      {application.data.originalContributions.map((contrib, index) => (
-                        <Card key={contrib.id || index}>
-                          <CardContent className="p-4">
-                            <h4 className="font-bold">{contrib.contributionTitle}</h4>
-                            <p className="text-sm text-gray-500">
-                              {contrib.field} • {contrib.contributionDate}
-                            </p>
-                            <p className="mt-2">{contrib.description}</p>
-                            <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
-                              {contrib.evidenceUrl && (
-                                <a 
-                                  href={contrib.evidenceUrl} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 hover:underline"
-                                >
-                                  <Download className="mr-1 inline h-4 w-4" />
-                                  View Evidence
-                                </a>
-                              )}
-                              {contrib.lettersUrl && (
-                                <a 
-                                  href={contrib.lettersUrl} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 hover:underline"
-                                >
-                                  <Download className="mr-1 inline h-4 w-4" />
-                                  View Support Letters
-                                </a>
-                              )}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-muted-foreground">No original contributions submitted.</p>
-                  )}
+                  <EntryCardList 
+                    title="Original Contributions"
+                    entries={application.data.originalContributions}
+                    renderEntry={(contrib) => (
+                      <EntryCard 
+                        key={contrib.id}
+                        title={contrib.contributionTitle}
+                        subtitle={`${contrib.field} • ${contrib.contributionDate}`}
+                        description={contrib.description}
+                        links={[
+                          ...(contrib.evidenceUrl ? [{ url: contrib.evidenceUrl, label: 'View Evidence' }] : []),
+                          ...(contrib.lettersUrl ? [{ url: contrib.lettersUrl, label: 'View Support Letters' }] : [])
+                        ]}
+                      />
+                    )}
+                  />
                 </TabsContent>
                 
                 <TabsContent value="articles" className="mt-0">
-                  <h3 className="mb-4 text-lg font-medium">Scholarly Articles</h3>
-                  {application.data.scholarlyArticles && application.data.scholarlyArticles.length > 0 ? (
-                    <div className="space-y-4">
-                      {application.data.scholarlyArticles.map((article, index) => (
-                        <Card key={article.id || index}>
-                          <CardContent className="p-4">
-                            <h4 className="font-bold">{article.articleTitle}</h4>
-                            <p className="text-sm text-gray-500">
-                              {article.journalName} • {article.publicationDate}
-                            </p>
-                            <p className="mt-2">{article.abstract}</p>
-                            <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
-                              {article.articleUrl && (
-                                <a 
-                                  href={article.articleUrl} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 hover:underline"
-                                >
-                                  <Download className="mr-1 inline h-4 w-4" />
-                                  View Article
-                                </a>
-                              )}
-                              {article.citationUrl && (
-                                <a 
-                                  href={article.citationUrl} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 hover:underline"
-                                >
-                                  <Download className="mr-1 inline h-4 w-4" />
-                                  View Citations
-                                </a>
-                              )}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-muted-foreground">No scholarly articles submitted.</p>
-                  )}
+                  <EntryCardList 
+                    title="Scholarly Articles"
+                    entries={application.data.scholarlyArticles}
+                    renderEntry={(article) => (
+                      <EntryCard 
+                        key={article.id}
+                        title={article.articleTitle}
+                        subtitle={`${article.journalName} • ${article.publicationDate}`}
+                        description={article.abstract}
+                        links={[
+                          ...(article.articleUrl ? [{ url: article.articleUrl, label: 'View Article' }] : []),
+                          ...(article.citationUrl ? [{ url: article.citationUrl, label: 'View Citations' }] : [])
+                        ]}
+                      />
+                    )}
+                  />
                 </TabsContent>
                 
                 <TabsContent value="exhibitions" className="mt-0">
-                  <h3 className="mb-4 text-lg font-medium">Exhibitions</h3>
-                  {application.data.exhibitions && application.data.exhibitions.length > 0 ? (
-                    <div className="space-y-4">
-                      {application.data.exhibitions.map((exhibition, index) => (
-                        <Card key={exhibition.id || index}>
-                          <CardContent className="p-4">
-                            <h4 className="font-bold">{exhibition.exhibitionName}</h4>
-                            <p className="text-sm text-gray-500">
-                              {exhibition.venueName}, {exhibition.venueLocation} • {exhibition.startDate} {exhibition.endDate ? `to ${exhibition.endDate}` : ''}
-                            </p>
-                            <p className="mt-2">{exhibition.exhibitionDescription}</p>
-                            <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-3">
-                              {exhibition.exhibitionDocUrl && (
-                                <a 
-                                  href={exhibition.exhibitionDocUrl} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 hover:underline"
-                                >
-                                  <Download className="mr-1 inline h-4 w-4" />
-                                  View Exhibition Doc
-                                </a>
-                              )}
-                              {exhibition.visualEvidenceUrl && (
-                                <a 
-                                  href={exhibition.visualEvidenceUrl} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 hover:underline"
-                                >
-                                  <Download className="mr-1 inline h-4 w-4" />
-                                  View Visual Evidence
-                                </a>
-                              )}
-                              {exhibition.reviewsUrl && (
-                                <a 
-                                  href={exhibition.reviewsUrl} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 hover:underline"
-                                >
-                                  <Download className="mr-1 inline h-4 w-4" />
-                                  View Reviews
-                                </a>
-                              )}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-muted-foreground">No exhibitions submitted.</p>
-                  )}
+                  <EntryCardList 
+                    title="Exhibitions"
+                    entries={application.data.exhibitions}
+                    renderEntry={(exhibition) => (
+                      <EntryCard 
+                        key={exhibition.id}
+                        title={exhibition.exhibitionName}
+                        subtitle={`${exhibition.venueName}, ${exhibition.venueLocation} • ${exhibition.startDate} ${exhibition.endDate ? `to ${exhibition.endDate}` : ''}`}
+                        description={exhibition.exhibitionDescription}
+                        links={[
+                          ...(exhibition.exhibitionDocUrl ? [{ url: exhibition.exhibitionDocUrl, label: 'View Exhibition Doc' }] : []),
+                          ...(exhibition.visualEvidenceUrl ? [{ url: exhibition.visualEvidenceUrl, label: 'View Visual Evidence' }] : []),
+                          ...(exhibition.reviewsUrl ? [{ url: exhibition.reviewsUrl, label: 'View Reviews' }] : [])
+                        ]}
+                      />
+                    )}
+                  />
                 </TabsContent>
                 
                 <TabsContent value="leadingRoles" className="mt-0">
-                  <h3 className="mb-4 text-lg font-medium">Leading Roles</h3>
-                  {application.data.leadingRoles && application.data.leadingRoles.length > 0 ? (
-                    <div className="space-y-4">
-                      {application.data.leadingRoles.map((role, index) => (
-                        <Card key={role.id || index}>
-                          <CardContent className="p-4">
-                            <h4 className="font-bold">{role.roleTitle}</h4>
-                            <p className="text-sm text-gray-500">
-                              {role.organizationName} • {role.startDate} {role.endDate ? `to ${role.endDate}` : 'to Present'}
-                            </p>
-                            <p className="mt-2">{role.responsibilities}</p>
-                            <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
-                              {role.verificationUrl && (
-                                <a 
-                                  href={role.verificationUrl} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 hover:underline"
-                                >
-                                  <Download className="mr-1 inline h-4 w-4" />
-                                  View Verification
-                                </a>
-                              )}
-                              {role.organizationChartUrl && (
-                                <a 
-                                  href={role.organizationChartUrl} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 hover:underline"
-                                >
-                                  <Download className="mr-1 inline h-4 w-4" />
-                                  View Org Chart
-                                </a>
-                              )}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-muted-foreground">No leading roles submitted.</p>
-                  )}
+                  <EntryCardList 
+                    title="Leading Roles"
+                    entries={application.data.leadingRoles}
+                    renderEntry={(role) => (
+                      <EntryCard 
+                        key={role.id}
+                        title={role.roleTitle}
+                        subtitle={`${role.organizationName} • ${role.startDate} ${role.endDate ? `to ${role.endDate}` : 'to Present'}`}
+                        description={role.responsibilities}
+                        links={[
+                          ...(role.verificationUrl ? [{ url: role.verificationUrl, label: 'View Verification' }] : []),
+                          ...(role.organizationChartUrl ? [{ url: role.organizationChartUrl, label: 'View Org Chart' }] : [])
+                        ]}
+                      />
+                    )}
+                  />
                 </TabsContent>
                 
                 <TabsContent value="salaries" className="mt-0">
-                  <h3 className="mb-4 text-lg font-medium">High Salaries</h3>
-                  {application.data.highSalaries && application.data.highSalaries.length > 0 ? (
-                    <div className="space-y-4">
-                      {application.data.highSalaries.map((salary, index) => (
-                        <Card key={salary.id || index}>
-                          <CardContent className="p-4">
-                            <h4 className="font-bold">{salary.employerName}</h4>
-                            <p className="text-sm text-gray-500">
-                              {salary.baseSalary} {salary.currency} {salary.frequency} • {salary.startDate} {salary.endDate ? `to ${salary.endDate}` : 'to Present'}
-                            </p>
-                            <p className="mt-2">{salary.additionalCompensation}</p>
-                            <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-3">
-                              {salary.salaryDocUrl && (
-                                <a 
-                                  href={salary.salaryDocUrl} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 hover:underline"
-                                >
-                                  <Download className="mr-1 inline h-4 w-4" />
-                                  View Salary Documents
-                                </a>
-                              )}
-                              {salary.industryEvidenceUrl && (
-                                <a 
-                                  href={salary.industryEvidenceUrl} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 hover:underline"
-                                >
-                                  <Download className="mr-1 inline h-4 w-4" />
-                                  View Industry Evidence
-                                </a>
-                              )}
-                              {salary.expertLettersUrl && (
-                                <a 
-                                  href={salary.expertLettersUrl} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 hover:underline"
-                                >
-                                  <Download className="mr-1 inline h-4 w-4" />
-                                  View Expert Letters
-                                </a>
-                              )}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-muted-foreground">No high salary evidence submitted.</p>
-                  )}
+                  <EntryCardList 
+                    title="High Salaries"
+                    entries={application.data.highSalaries}
+                    renderEntry={(salary) => (
+                      <EntryCard 
+                        key={salary.id}
+                        title={salary.employerName}
+                        subtitle={`${salary.baseSalary} ${salary.currency} ${salary.frequency} • ${salary.startDate} ${salary.endDate ? `to ${salary.endDate}` : 'to Present'}`}
+                        description={salary.additionalCompensation}
+                        links={[
+                          ...(salary.salaryDocUrl ? [{ url: salary.salaryDocUrl, label: 'View Salary Documents' }] : []),
+                          ...(salary.industryEvidenceUrl ? [{ url: salary.industryEvidenceUrl, label: 'View Industry Evidence' }] : []),
+                          ...(salary.expertLettersUrl ? [{ url: salary.expertLettersUrl, label: 'View Expert Letters' }] : [])
+                        ]}
+                      />
+                    )}
+                  />
                 </TabsContent>
                 
                 <TabsContent value="commercial" className="mt-0">
-                  <h3 className="mb-4 text-lg font-medium">Commercial Successes</h3>
-                  {application.data.commercialSuccesses && application.data.commercialSuccesses.length > 0 ? (
-                    <div className="space-y-4">
-                      {application.data.commercialSuccesses.map((success, index) => (
-                        <Card key={success.id || index}>
-                          <CardContent className="p-4">
-                            <h4 className="font-bold">{success.projectTitle}</h4>
-                            <p className="text-sm text-gray-500">
-                              {success.projectType} • {success.role} • Released {success.releaseDate}
-                            </p>
-                            <p className="mt-2">{success.metrics}</p>
-                            <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
-                              {success.salesDocUrl && (
-                                <a 
-                                  href={success.salesDocUrl} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 hover:underline"
-                                >
-                                  <Download className="mr-1 inline h-4 w-4" />
-                                  View Sales Documents
-                                </a>
-                              )}
-                              {success.mediaCoverageUrl && (
-                                <a 
-                                  href={success.mediaCoverageUrl} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 hover:underline"
-                                >
-                                  <Download className="mr-1 inline h-4 w-4" />
-                                  View Media Coverage
-                                </a>
-                              )}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-muted-foreground">No commercial success evidence submitted.</p>
-                  )}
+                  <EntryCardList 
+                    title="Commercial Successes"
+                    entries={application.data.commercialSuccesses}
+                    renderEntry={(success) => (
+                      <EntryCard 
+                        key={success.id}
+                        title={success.projectTitle}
+                        subtitle={`${success.projectType} • ${success.role} • Released ${success.releaseDate}`}
+                        description={success.metrics}
+                        links={[
+                          ...(success.salesDocUrl ? [{ url: success.salesDocUrl, label: 'View Sales Documents' }] : []),
+                          ...(success.mediaCoverageUrl ? [{ url: success.mediaCoverageUrl, label: 'View Media Coverage' }] : [])
+                        ]}
+                      />
+                    )}
+                  />
                 </TabsContent>
               </Tabs>
             </CardContent>
