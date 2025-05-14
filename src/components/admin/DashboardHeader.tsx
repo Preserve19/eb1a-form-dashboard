@@ -30,7 +30,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ userEmail, onLogout }
               variant="outline" 
               size={isMobile ? "sm" : "default"}
               onClick={onLogout}
-              className="border-white/20 bg-transparent text-white hover:bg-white/10 hover:text-white"
+              className="border-white/20 bg-navy-800 text-navy-100 hover:bg-white/10 hover:text-white"
             >
               <LogOut size={16} className={isMobile ? "mr-0" : "mr-2"} />
               {!isMobile && "Logout"}
