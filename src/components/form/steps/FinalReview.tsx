@@ -1,7 +1,7 @@
 
 import { useForm } from '@/contexts/FormContext';
 import { Card } from '@/components/ui/card';
-import { AlertTriangle, CheckCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle, MapPin, Phone, Mail, Linkedin, Globe } from 'lucide-react';
 
 const FinalReview = () => {
   const { formData } = useForm();
@@ -72,19 +72,62 @@ const FinalReview = () => {
       )}
 
       <div>
-        <h3 className="mb-4 text-lg font-semibold text-gray-900">Summary of Information Provided</h3>
+        <h3 className="mb-4 text-lg font-semibold text-gray-900">Personal Information</h3>
         
-        <Card className="mb-6 bg-gray-50 p-4">
-          <h4 className="mb-2 font-medium text-gray-900">Applicant Information</h4>
-          <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+        <Card className="mb-6 bg-gray-50 p-6">
+          <div className="space-y-4">
             <div>
-              <p className="text-sm font-medium text-gray-600">Full Name:</p>
-              <p className="font-medium">{formData.fullName}</p>
+              <p className="text-sm font-medium text-emerald-600 mb-1">Full Name</p>
+              <p className="font-medium text-gray-900">{formData.fullName}</p>
             </div>
+            
             <div>
-              <p className="text-sm font-medium text-gray-600">Email:</p>
-              <p>{formData.email}</p>
+              <p className="text-sm font-medium text-emerald-600 mb-1">Email</p>
+              <div className="flex items-center">
+                <Mail className="h-4 w-4 text-emerald-600 mr-2" />
+                <p className="text-gray-900">{formData.email}</p>
+              </div>
             </div>
+            
+            {formData.phone && (
+              <div>
+                <p className="text-sm font-medium text-emerald-600 mb-1">Phone Number</p>
+                <div className="flex items-center">
+                  <Phone className="h-4 w-4 text-emerald-600 mr-2" />
+                  <p className="text-gray-900">{formData.phone}</p>
+                </div>
+              </div>
+            )}
+            
+            {formData.address && (
+              <div>
+                <p className="text-sm font-medium text-emerald-600 mb-1">Address</p>
+                <div className="flex items-center">
+                  <MapPin className="h-4 w-4 text-emerald-600 mr-2" />
+                  <p className="text-gray-900">{formData.address}</p>
+                </div>
+              </div>
+            )}
+            
+            {formData.linkedIn && (
+              <div>
+                <p className="text-sm font-medium text-emerald-600 mb-1">LinkedIn</p>
+                <div className="flex items-center">
+                  <Linkedin className="h-4 w-4 text-emerald-600 mr-2" />
+                  <p className="text-gray-900">{formData.linkedIn}</p>
+                </div>
+              </div>
+            )}
+            
+            {formData.website && (
+              <div>
+                <p className="text-sm font-medium text-emerald-600 mb-1">Website</p>
+                <div className="flex items-center">
+                  <Globe className="h-4 w-4 text-emerald-600 mr-2" />
+                  <p className="text-gray-900">{formData.website}</p>
+                </div>
+              </div>
+            )}
           </div>
         </Card>
         

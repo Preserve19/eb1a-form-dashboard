@@ -12,6 +12,7 @@ import ApplicantInfoCard from '@/components/admin/ApplicantInfoCard';
 import ApplicationTabs from '@/components/admin/ApplicationTabs';
 import ApplicationNotFound from '@/components/admin/ApplicationNotFound';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
 interface FormRecord {
   id: string;
@@ -109,6 +110,15 @@ const ApplicationDetail = () => {
     return <ApplicationNotFound onBack={handleBack} />;
   }
   
+  // Format key information for the applicant info card
+  const applicantInfo = {
+    fullName: application.data.fullName || 'Not provided',
+    email: application.data.email || 'Not provided',
+    createdAt: application.created_at,
+    submittedAt: application.submitted_at,
+    id: application.id
+  };
+  
   return (
     <div className="container mx-auto p-4 py-8">
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -125,15 +135,55 @@ const ApplicationDetail = () => {
       
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className={isMobile ? "order-1" : ""}>
-          <ApplicantInfoCard 
-            fullName={application.data.fullName}
-            email={application.data.email}
-            createdAt={application.created_at}
-            submittedAt={application.submitted_at}
-            id={application.id}
-            isDownloading={isDownloading}
-            onDownload={handleDownload}
-          />
+          <Card className="mb-6">
+            <CardHeader className="border-b pb-4">
+              <h2 className="text-xl font-semibold">Applicant Information</h2>
+            </CardHeader>
+            <CardContent className="pt-4">
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm font-medium text-emerald-600 mb-1">Full Name</p>
+                  <p className="text-gray-900">{applicantInfo.fullName}</p>
+                </div>
+                
+                <div>
+                  <p className="text-sm font-medium text-emerald-600 mb-1">Email</p>
+                  <p className="text-gray-900">{applicantInfo.email}</p>
+                </div>
+                
+                <div>
+                  <p className="text-sm font-medium text-emerald-600 mb-1">Application ID</p>
+                  <p className="text-gray-900 font-mono text-sm">{applicantInfo.id}</p>
+                </div>
+                
+                <div>
+                  <p className="text-sm font-medium text-emerald-600 mb-1">Created</p>
+                  <p className="text-gray-900">
+                    {format(new Date(applicantInfo.createdAt), 'MMM dd, yyyy HH:mm')}
+                  </p>
+                </div>
+                
+                {applicantInfo.submittedAt && (
+                  <div>
+                    <p className="text-sm font-medium text-emerald-600 mb-1">Submitted</p>
+                    <p className="text-gray-900">
+                      {format(new Date(applicantInfo.submittedAt), 'MMM dd, yyyy HH:mm')}
+                    </p>
+                  </div>
+                )}
+              </div>
+              
+              <div className="mt-6">
+                <Button
+                  onClick={handleDownload}
+                  disabled={isDownloading}
+                  className="w-full"
+                >
+                  {isDownloading ? 'Downloading...' : 'Download Application Data'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
         
         <div className="lg:col-span-2">
