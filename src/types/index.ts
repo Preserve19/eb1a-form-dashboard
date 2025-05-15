@@ -1,9 +1,13 @@
+
 // Base Types
 export interface BaseFormData {
   id?: string;
   fullName: string;
   email: string;
   phone?: string; // Add phone property as optional
+  address?: string; // Add address property as optional
+  linkedIn?: string; // Add linkedIn property as optional
+  website?: string; // Add website property as optional
   status: 'draft' | 'submitted';
   createdAt?: string;
   updatedAt?: string;
