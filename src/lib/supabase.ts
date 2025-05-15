@@ -47,37 +47,16 @@ export const uploadFile = async (
   onProgress?: (progress: number) => void
 ): Promise<string> => {
   try {
-    console.log(`Starting upload to bucket: ${bucketName}, path: ${filePath}`);
-    
-    // Verify bucket exists
-    const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
-    if (bucketError) {
-      console.error('Error checking buckets:', bucketError);
-      throw new Error(`Error checking buckets: ${bucketError.message}`);
-    }
-    
-    const bucketExists = buckets?.some(bucket => bucket.name === bucketName);
-    if (!bucketExists) {
-      console.error(`Bucket '${bucketName}' does not exist`);
-      throw new Error(`Bucket '${bucketName}' does not exist`);
-    }
-    
-    console.log(`Uploading file: ${file.name}, size: ${file.size} bytes`);
-    
     // Upload the file
     const { data, error } = await supabase.storage
       .from(bucketName)
       .upload(filePath, file, { 
-        upsert: true,
-        cacheControl: '3600'
+        upsert: true
       });
       
     if (error) {
-      console.error('Supabase storage upload error:', error);
       throw error;
     }
-    
-    console.log('Upload successful, data:', data);
     
     // If there's a progress callback, simulate progress
     if (onProgress) {
@@ -87,7 +66,6 @@ export const uploadFile = async (
     
     // Return the full URL to the file
     const { data: publicUrl } = supabase.storage.from(bucketName).getPublicUrl(data.path);
-    console.log('Public URL generated:', publicUrl.publicUrl);
     return publicUrl.publicUrl;
   } catch (error: any) {
     console.error('Error uploading file:', error);
