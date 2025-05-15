@@ -58,11 +58,13 @@ export function FileUpload({
     setError(null);
 
     try {
-      // We need to use 'uploads' as the bucket name and generate a unique file path
+      // We use 'uploads' as the bucket name and generate a unique file path
       const bucketName = 'uploads';
-      const uniqueFilePath = `${path}/${Date.now()}-${file.name}`;
+      const uniqueFilePath = `${path}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
       
-      // Simulate progress updates since the Supabase JS client doesn't support progress callbacks
+      console.log(`Uploading to bucket: ${bucketName}, path: ${uniqueFilePath}`);
+      
+      // Simulate progress updates
       const progressInterval = setInterval(() => {
         setUploadProgress(prev => {
           const newProgress = prev + Math.random() * 10;
@@ -91,20 +93,15 @@ export function FileUpload({
           description: "Your file has been uploaded and attached to the form."
         });
       } else {
-        setError('Failed to upload file. Please try again.');
-        toast({
-          variant: "destructive",
-          title: "Upload failed",
-          description: "Failed to upload file. Please try again."
-        });
+        throw new Error('No file URL returned');
       }
     } catch (error: any) {
-      console.error('Error uploading file:', error);
-      setError('An error occurred during upload. Please try again.');
+      console.error('Error in file-upload component:', error);
+      setError(error.message || 'An error occurred during upload. Please try again.');
       toast({
         variant: "destructive",
-        title: "Upload error",
-        description: error.message || "An error occurred during upload"
+        title: "Upload failed",
+        description: error.message || "An error occurred during upload. Please try again."
       });
     } finally {
       setIsUploading(false);
