@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Settings } from "lucide-react";
 
 const Index = () => {
   return (
@@ -82,6 +82,16 @@ const Index = () => {
               <li>Original contributions of major significance</li>
               <li>+5 more criteria</li>
             </ul>
+          </div>
+          
+          {/* Admin Access Button */}
+          <div className="mt-8 flex justify-center">
+            <Link to="/admin/login">
+              <Button variant="outline" className="flex items-center gap-2">
+                <Settings size={16} />
+                Admin Access
+              </Button>
+            </Link>
           </div>
         </section>
       </main>
