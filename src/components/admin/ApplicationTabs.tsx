@@ -6,6 +6,7 @@ import { EB1AFormData } from '@/types';
 import ApplicationOverview from '@/components/admin/ApplicationOverview';
 import EntryCardList, { EntryCard } from '@/components/admin/EntryCardList';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface ApplicationTabsProps {
   formData: EB1AFormData;
@@ -25,21 +26,23 @@ const ApplicationTabs: React.FC<ApplicationTabsProps> = ({
   return (
     <Card>
       <CardHeader className="border-b">
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className={`overflow-x-auto ${isMobile ? 'flex flex-wrap gap-1 justify-start' : ''}`}>
-            <TabsTrigger value="details">Overview</TabsTrigger>
-            <TabsTrigger value="awards">Prizes & Awards</TabsTrigger>
-            <TabsTrigger value="memberships">Memberships</TabsTrigger>
-            <TabsTrigger value="publications">Publications</TabsTrigger>
-            <TabsTrigger value="judging">Judging</TabsTrigger>
-            <TabsTrigger value="contributions">Contributions</TabsTrigger>
-            <TabsTrigger value="articles">Articles</TabsTrigger>
-            <TabsTrigger value="exhibitions">Exhibitions</TabsTrigger>
-            <TabsTrigger value="leadingRoles">Leading Roles</TabsTrigger>
-            <TabsTrigger value="salaries">Salaries</TabsTrigger>
-            <TabsTrigger value="commercial">Commercial</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <ScrollArea className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className={`${isMobile ? 'flex flex-wrap gap-1 justify-start' : 'w-full flex'}`}>
+              <TabsTrigger value="details">Overview</TabsTrigger>
+              <TabsTrigger value="awards">Prizes & Awards</TabsTrigger>
+              <TabsTrigger value="memberships">Memberships</TabsTrigger>
+              <TabsTrigger value="publications">Publications</TabsTrigger>
+              <TabsTrigger value="judging">Judging</TabsTrigger>
+              <TabsTrigger value="contributions">Contributions</TabsTrigger>
+              <TabsTrigger value="articles">Articles</TabsTrigger>
+              <TabsTrigger value="exhibitions">Exhibitions</TabsTrigger>
+              <TabsTrigger value="leadingRoles">Leading Roles</TabsTrigger>
+              <TabsTrigger value="salaries">Salaries</TabsTrigger>
+              <TabsTrigger value="commercial">Commercial</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </ScrollArea>
       </CardHeader>
       
       <CardContent className="p-6">
