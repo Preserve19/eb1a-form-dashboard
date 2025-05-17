@@ -25,23 +25,25 @@ const ApplicationTabs: React.FC<ApplicationTabsProps> = ({
   
   return (
     <Card>
-      <CardHeader className="border-b">
-        <ScrollArea className="w-full">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className={`${isMobile ? 'flex flex-wrap gap-1 justify-start' : 'w-full flex'}`}>
-              <TabsTrigger value="details">Overview</TabsTrigger>
-              <TabsTrigger value="awards">Prizes & Awards</TabsTrigger>
-              <TabsTrigger value="memberships">Memberships</TabsTrigger>
-              <TabsTrigger value="publications">Publications</TabsTrigger>
-              <TabsTrigger value="judging">Judging</TabsTrigger>
-              <TabsTrigger value="contributions">Contributions</TabsTrigger>
-              <TabsTrigger value="articles">Articles</TabsTrigger>
-              <TabsTrigger value="exhibitions">Exhibitions</TabsTrigger>
-              <TabsTrigger value="leadingRoles">Leading Roles</TabsTrigger>
-              <TabsTrigger value="salaries">Salaries</TabsTrigger>
-              <TabsTrigger value="commercial">Commercial</TabsTrigger>
-            </TabsList>
-          </Tabs>
+      <CardHeader className="border-b pb-2">
+        <ScrollArea className="w-full" orientation="horizontal">
+          <div className="min-w-max pb-3">
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className={isMobile ? "flex flex-wrap gap-1 justify-start" : "flex w-full"}>
+                <TabsTrigger value="details">Overview</TabsTrigger>
+                <TabsTrigger value="awards">Prizes & Awards</TabsTrigger>
+                <TabsTrigger value="memberships">Memberships</TabsTrigger>
+                <TabsTrigger value="publications">Publications</TabsTrigger>
+                <TabsTrigger value="judging">Judging</TabsTrigger>
+                <TabsTrigger value="contributions">Contributions</TabsTrigger>
+                <TabsTrigger value="articles">Articles</TabsTrigger>
+                <TabsTrigger value="exhibitions">Exhibitions</TabsTrigger>
+                <TabsTrigger value="leadingRoles">Leading Roles</TabsTrigger>
+                <TabsTrigger value="salaries">Salaries</TabsTrigger>
+                <TabsTrigger value="commercial">Commercial</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
         </ScrollArea>
       </CardHeader>
       
