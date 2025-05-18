@@ -86,15 +86,21 @@ const Form = () => {
     <div className="min-h-screen bg-slate-50 pb-16">
       <header className="bg-navy-800 px-4 py-6 text-white">
         <div className="container mx-auto">
-          <div className="flex items-center">
+          <div className="flex flex-col items-center sm:items-start md:flex-row md:items-center gap-3 md:gap-4">
             <img 
               src="/lovable-uploads/88567fb0-7213-4614-b9e3-55a0693cc568.png" 
               alt="StraightGreenCard Logo" 
-              className="h-8 mr-3" 
+              className="h-10 sm:h-12" 
             />
-            <h1 className="text-2xl sm:text-3xl font-bold">StraightGreenCard EB1A Application Form</h1>
+            <div>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-center md:text-left">
+                StraightGreenCard EB1A Application Form
+              </h1>
+              <p className="mt-1 sm:mt-2 text-sm sm:text-base text-center md:text-left">
+                Complete the following sections to prepare your EB1A application documentation.
+              </p>
+            </div>
           </div>
-          <p className="mt-2">Complete the following sections to prepare your EB1A application documentation.</p>
           
           {currentStep > 0 && (
             <>
